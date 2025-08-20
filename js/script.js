@@ -124,6 +124,11 @@ let currentAbortController = null; // 用于取消正在进行的流式传输
 function triggerAutoTranslate() {
     const text = sourceText.value.trim();
     if (!text) {
+        // 中断正在进行的流式传输
+        if (currentAbortController) {
+            currentAbortController.abort();
+            currentAbortController = null;
+        }
         resultArea.innerHTML = '';
         tokenCount.style.display = 'none';
         adjustResultAreaHeight();
@@ -471,6 +476,13 @@ function setDefaultLanguages() {
 function startInputCheckInterval() {
     setInterval(() => {
         if (sourceText.value.trim() === '') {
+            // 中断正在进行的流式传输
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            // 清除翻译定时器
+            clearTimeout(translateTimeout);
             resultArea.innerHTML = '';
             tokenCount.style.display = 'none';
             adjustResultAreaHeight();
