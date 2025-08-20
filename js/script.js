@@ -27,6 +27,7 @@ function escapeHtml(text) {
 let config = {};
 let currentToken = '';
 let tokenExpireTime = 0;
+let tokenFetchFailed = false; // 新增：标记token获取是否失败
 
 // 语言名称映射
 const languageNames = {
@@ -334,6 +335,7 @@ async function getApiToken() {
         if (data.apiToken && data.expireTime) {
             currentToken = data.apiToken;
             tokenExpireTime = Date.now() + (data.expireTime * 1000);
+            tokenFetchFailed = false; // 重置失败状态
             updateTokenStatus();
             return currentToken;
         } else {
@@ -341,6 +343,8 @@ async function getApiToken() {
         }
     } catch (error) {
         console.error('获取Token失败:', error);
+        tokenFetchFailed = true; // 标记为获取失败
+        updateTokenStatus();
         throw error;
     }
 }
@@ -352,7 +356,10 @@ function isTokenValid() {
 
 // 更新Token状态显示
 function updateTokenStatus() {
-    if (!currentToken) {
+    if (tokenFetchFailed) {
+        tokenStatus.textContent = 'Token: 获取失败';
+        tokenStatus.className = 'token-status expired'; // 使用与过期一致的红色
+    } else if (!currentToken) {
         tokenStatus.textContent = 'Token: 未获取';
         tokenStatus.className = 'token-status';
     } else if (isTokenValid()) {
@@ -369,7 +376,7 @@ function updateTokenStatus() {
 
 // 获取有效的Token
 async function getValidToken() {
-    if (!isTokenValid()) {
+    if (!isTokenValid() || tokenFetchFailed) {
         await getApiToken();
     }
     return currentToken;
