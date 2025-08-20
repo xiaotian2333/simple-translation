@@ -405,9 +405,9 @@ function adjustTextareaHeight(textarea) {
     const minHeight = 100;
     const maxHeight = 600;
     
-    // 使用scrollHeight获取实际内容高度
+    // 使用scrollHeight获取实际内容高度，增加20像素缓冲避免滚动条
     const contentHeight = textarea.scrollHeight;
-    let newHeight = Math.max(minHeight, contentHeight);
+    let newHeight = Math.max(minHeight, contentHeight + 80);
     newHeight = Math.min(maxHeight, newHeight);
     
     textarea.style.height = newHeight + 'px';
@@ -424,9 +424,9 @@ function adjustResultAreaHeight() {
     const minHeight = 100;
     const maxHeight = 600;
     
-    // 使用scrollHeight获取实际内容高度
+    // 使用scrollHeight获取实际内容高度，增加20像素缓冲避免滚动条
     const contentHeight = resultArea.scrollHeight;
-    let newHeight = Math.max(minHeight, contentHeight);
+    let newHeight = Math.max(minHeight, contentHeight + 80);
     newHeight = Math.min(maxHeight, newHeight);
     
     resultArea.style.height = newHeight + 'px';
