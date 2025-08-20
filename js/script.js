@@ -9,6 +9,7 @@ const copyBtn = document.getElementById('copySourceBtn');
 const charCount = document.getElementById('charCount');
 const modelSelect = document.getElementById('modelSelect');
 const tokenStatus = document.getElementById('tokenStatus');
+const tokenCount = document.getElementById('tokenCount');
 
 // HTML转义函数
 function escapeHtml(text) {
@@ -75,6 +76,9 @@ swapBtn.addEventListener('click', () => {
     // 更新字符计数
     charCount.textContent = `${sourceText.value.length} 字符`;
     
+    // 隐藏token计数，因为这是交换内容而不是新的翻译
+    tokenCount.style.display = 'none';
+    
     // 调整两个区域的高度
     adjustTextareaHeight(sourceText);
     adjustResultAreaHeight();
@@ -119,6 +123,7 @@ function triggerAutoTranslate() {
     const text = sourceText.value.trim();
     if (!text) {
         resultArea.innerHTML = '';
+        tokenCount.style.display = 'none';
         adjustResultAreaHeight();
         return;
     }
@@ -131,12 +136,14 @@ function triggerAutoTranslate() {
         // 显示加载状态
         loading.classList.add('show');
         resultArea.textContent = '准备翻译...';
+        tokenCount.style.display = 'none';
 
         try {
             await translateWithGLM(text, sourceLang.value, targetLang.value);
             // 流式传输会在函数内部实时显示，无需额外处理
         } catch (error) {
             console.error('翻译失败:', error);
+            tokenCount.style.display = 'none';
             // resultArea.textContent = `翻译失败: ${error.message}`; // 错误提示已有另外的代码处理
         } finally {
             loading.classList.remove('show');
@@ -205,12 +212,14 @@ async function translateWithGLM(text, from, to) {
     let fullContent = '';
     let thinkingContent = '';
     let isThinking = false;
+    let totalTokens = 0;
 
     return new Promise((resolve, reject) => {
         function processStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
                     // 流结束，返回最终结果
+                    updateTokenDisplay(totalTokens);
                     if (config.thinkPrint && thinkingContent) {
                         resolve(`思考过程：\n${thinkingContent}\n\n翻译结果：\n${fullContent}`);
                     } else {
@@ -230,6 +239,11 @@ async function translateWithGLM(text, from, to) {
                         try {
                             const json = JSON.parse(data);
                             const delta = json.choices[0].delta;
+                            
+                            // 统计token消耗
+                            if (json.usage) {
+                                totalTokens = json.usage.total_tokens || 0;
+                            }
                             
                             if (delta.thinking_content) {
                                 isThinking = true;
@@ -277,6 +291,16 @@ async function translateWithGLM(text, from, to) {
 
         processStream(); // 开始处理流
     });
+}
+
+// 更新token显示
+function updateTokenDisplay(tokens) {
+    if (tokens > 0) {
+        tokenCount.textContent = `Token: ${tokens}`;
+        tokenCount.style.display = 'inline';
+    } else {
+        tokenCount.style.display = 'none';
+    }
 }
 
 // 获取API Token
@@ -414,6 +438,17 @@ function setDefaultLanguages() {
     targetLang.value = 'zh';  // 默认目标语言为中文
 }
 
+// 定时检查输入框是否为空，如为空则清空输出框
+function startInputCheckInterval() {
+    setInterval(() => {
+        if (sourceText.value.trim() === '') {
+            resultArea.innerHTML = '';
+            tokenCount.style.display = 'none';
+            adjustResultAreaHeight();
+        }
+    }, 1000); // 每秒检查一次
+}
+
 // 页面加载时加载配置
 window.addEventListener('load', () => {
     setDefaultLanguages();
@@ -421,4 +456,6 @@ window.addEventListener('load', () => {
     // 设置初始高度
     adjustTextareaHeight(sourceText);
     adjustResultAreaHeight();
+    // 启动定时检查
+    startInputCheckInterval();
 });
