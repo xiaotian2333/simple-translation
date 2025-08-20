@@ -119,6 +119,7 @@ function typeWriter(element, text, speed = 30) {
 
 // 自动翻译功能
 let translateTimeout;
+let currentAbortController = null; // 用于取消正在进行的流式传输
 function triggerAutoTranslate() {
     const text = sourceText.value.trim();
     if (!text) {
@@ -131,6 +132,12 @@ function triggerAutoTranslate() {
     // 清除之前的定时器
     clearTimeout(translateTimeout);
     
+    // 取消正在进行的流式传输
+    if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+    }
+    
     // 设置新的定时器，延迟500ms执行翻译
     translateTimeout = setTimeout(async () => {
         // 显示加载状态
@@ -142,9 +149,12 @@ function triggerAutoTranslate() {
             await translateWithGLM(text, sourceLang.value, targetLang.value);
             // 流式传输会在函数内部实时显示，无需额外处理
         } catch (error) {
-            console.error('翻译失败:', error);
-            tokenCount.style.display = 'none';
-            // resultArea.textContent = `翻译失败: ${error.message}`; // 错误提示已有另外的代码处理
+            // 如果是取消错误，不显示错误信息
+            if (error.message !== '翻译被取消') {
+                console.error('翻译失败:', error);
+                tokenCount.style.display = 'none';
+                // resultArea.textContent = `翻译失败: ${error.message}`; // 错误提示已有另外的代码处理
+            }
         } finally {
             loading.classList.remove('show');
         }
@@ -153,6 +163,10 @@ function triggerAutoTranslate() {
 
 // 智谱GLM翻译函数
 async function translateWithGLM(text, from, to) {
+    // 创建新的AbortController
+    currentAbortController = new AbortController();
+    const { signal } = currentAbortController;
+    
     const url = config.api_url;
     
     // 获取有效的Token
@@ -199,7 +213,8 @@ async function translateWithGLM(text, from, to) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: signal
     });
 
     if (!response.ok) {
@@ -215,10 +230,17 @@ async function translateWithGLM(text, from, to) {
     let totalTokens = 0;
 
     return new Promise((resolve, reject) => {
+        // 添加取消事件监听
+        signal.addEventListener('abort', () => {
+            currentAbortController = null;
+            reject(new Error('翻译被取消'));
+        });
+        
         function processStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    // 流结束，返回最终结果
+                    // 流结束，清除AbortController并返回最终结果
+                    currentAbortController = null;
                     updateTokenDisplay(totalTokens);
                     if (config.thinkPrint && thinkingContent) {
                         resolve(`思考过程：\n${thinkingContent}\n\n翻译结果：\n${fullContent}`);
