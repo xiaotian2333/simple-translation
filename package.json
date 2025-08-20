@@ -1,0 +1,28 @@
+{
+  "name": "immersive-translation",
+  "version": "1.0.0",
+  "description": "沉浸式翻译服务器，提供JWT token生成和静态文件服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "winston": "^3.11.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "translation",
+    "jwt",
+    "token",
+    "immersive"
+  ],
+  "author": "",
+  "license": "MIT",
+  "env": {
+    "API_KEY": "您的API密钥，格式为 id.secret"
+  }
+}
