@@ -145,7 +145,7 @@ const server = http.createServer((req, res) => {
     // ====================== 请求日志记录 ======================
     // 获取用户IP并记录请求信息
     const ip = getip(req);
-    logger.info(`请求来自IP: ${ip}`);
+    logger.http(`请求来自IP: ${ip}`);
 
     // ====================== 路由处理 ======================
 
@@ -176,8 +176,18 @@ const server = http.createServer((req, res) => {
     } else {
         // ====================== 静态文件服务 ======================
 
-        // 构建文件路径，根路径映射到index.html
-        let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url)
+        // 构建文件路径，优先提供output.html
+        let filePath
+        if (req.url === '/') {
+            // 使用启动时预检查的结果
+            if (hasOutputFile) {
+                filePath = outputPath
+            } else {
+                filePath = path.join(__dirname, 'index.html')
+            }
+        } else {
+            filePath = path.join(__dirname, req.url)
+        }
 
         // 获取文件扩展名
         const extname = path.extname(filePath)
@@ -239,10 +249,22 @@ if (!process.env.API_KEY) {
 }
 
 /**
+ * 启动服务器前检查是否有构建产物
+ * 如有 output.html 则优先使用
+ */
+const outputPath = path.join(__dirname, 'output.html')
+const hasOutputFile = fs.existsSync(outputPath)
+
+/**
  * 启动HTTP服务器
  * 监听指定端口，提供Web服务
  */
-server.listen(PORT, () => {
+server.listen(PORT, () => {    
+    // 输出文件检查结果
+    if (!hasOutputFile) {
+        logger.warn('未找到output.html文件，将使用index.html提供对外服务')
+        logger.warn('如在生产环境部署请执行 npm run build 命令以优化性能')
+    }
     logger.info(`${plugin_name}服务已启动，监听端口 ${PORT}`)
     logger.info(`访问 http://localhost:${PORT} 使用${plugin_name}`)
     logger.info(`访问 http://localhost:${PORT}/get_token 获取token`)
