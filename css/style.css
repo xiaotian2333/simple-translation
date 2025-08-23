@@ -1,3 +1,45 @@
+/* 深色模式变量 */
+:root {
+    --bg-color: #f5f5f5;
+    --text-color: #333;
+    --container-bg: white;
+    --border-color: #ddd;
+    --shadow-color: rgba(0,0,0,0.1);
+    --primary-color: #1890ff;
+    --primary-hover: #40a9ff;
+    --success-color: #52c41a;
+    --success-hover: #73d13d;
+    --error-color: #ff4d4f;
+    --secondary-text: #666;
+    --tertiary-text: #999;
+    --input-bg: white;
+    --result-bg: #fafafa;
+    --status-bg: #f0f0f0;
+    --success-bg: #f6ffed;
+    --error-bg: #fff2f0;
+}
+
+/* 深色模式样式 */
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --container-bg: #2d2d2d;
+    --border-color: #444;
+    --shadow-color: rgba(0,0,0,0.3);
+    --primary-color: #4dabf7;
+    --primary-hover: #339af0;
+    --success-color: #51cf66;
+    --success-hover: #40c057;
+    --error-color: #ff6b6b;
+    --secondary-text: #b0b0b0;
+    --tertiary-text: #888;
+    --input-bg: #1e1e1e;
+    --result-bg: #262626;
+    --status-bg: #404040;
+    --success-bg: #2d4a2b;
+    --error-bg: #4a2d2d;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,8 +48,9 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -20,25 +63,26 @@ body {
     text-align: center;
     margin-bottom: 30px;
     padding: 20px 0;
+    position: relative;
 }
 
 .header h1 {
     font-size: 2.5em;
-    color: #1890ff;
+    color: var(--primary-color);
     margin-bottom: 10px;
 }
 
 .header p {
     font-size: 1.2em;
-    color: #666;
+    color: var(--secondary-text);
 }
 
 
 .translate-container {
-    background: white;
+    background: var(--container-bg);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .language-selector {
@@ -60,50 +104,52 @@ body {
 
 .model-label {
     font-size: 14px;
-    color: #666;
+    color: var(--secondary-text);
     font-weight: 500;
 }
 
 .model-select {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 14px;
-    background: white;
+    background: var(--input-bg);
+    color: var(--text-color);
     cursor: pointer;
     min-width: 150px;
 }
 
 .token-status {
     font-size: 12px;
-    color: #999;
+    color: var(--tertiary-text);
     padding: 4px 8px;
-    background: #f0f0f0;
+    background: var(--status-bg);
     border-radius: 4px;
 }
 
 .token-status.valid {
-    color: #52c41a;
-    background: #f6ffed;
+    color: var(--success-color);
+    background: var(--success-bg);
 }
 
 .token-status.expired {
-    color: #ff4d4f;
-    background: #fff2f0;
+    color: var(--error-color);
+    background: var(--error-bg);
 }
 
 .language-select {
     padding: 10px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 16px;
-    background: white;
+    background: var(--input-bg);
+    color: var(--text-color);
     cursor: pointer;
     min-width: 120px;
 }
 
 .swap-btn {
-    background: #1890ff;
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 50%;
@@ -115,7 +161,7 @@ body {
 }
 
 .swap-btn:hover {
-    background: #40a9ff;
+    background: var(--primary-hover);
 }
 
 .translate-content {
@@ -141,17 +187,17 @@ body {
 .panel-title {
     font-size: 16px;
     font-weight: 500;
-    color: #555;
+    color: var(--secondary-text);
 }
 
 .char-count {
     font-size: 12px;
-    color: #999;
+    color: var(--tertiary-text);
 }
 
 .token-count {
     font-size: 12px;
-    color: #999;
+    color: var(--tertiary-text);
 }
 
 .text-area {
@@ -159,18 +205,20 @@ body {
     min-height: 100px;
     max-height: 600px;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
     resize: none;
     font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text-color);
     overflow-y: auto;
     transition: height 0.2s ease;
 }
 
 .text-area:focus {
     outline: none;
-    border-color: #1890ff;
+    border-color: var(--primary-color);
 }
 
 .result-area {
@@ -178,10 +226,10 @@ body {
     min-height: 100px;
     max-height: 600px;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
-    background: #fafafa;
+    background: var(--result-bg);
     resize: none;
     font-family: inherit;
     line-height: 1.5;
@@ -195,7 +243,7 @@ body {
 .typing-cursor::after {
     content: '|';
     animation: blink 1s infinite;
-    color: #1890ff;
+    color: var(--primary-color);
 }
 
 @keyframes blink {
@@ -205,7 +253,7 @@ body {
 
 
 .copy-btn {
-    background: #52c41a;
+    background: var(--success-color);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -215,13 +263,13 @@ body {
 }
 
 .copy-btn:hover {
-    background: #73d13d;
+    background: var(--success-hover);
 }
 
 .loading {
     display: none;
     text-align: center;
-    color: #666;
+    color: var(--secondary-text);
     padding: 20px;
 }
 

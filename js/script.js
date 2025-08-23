@@ -41,6 +41,22 @@ const languageNames = {
     'ru': '俄语'
 };
 
+// 主题管理功能
+function initTheme() {
+    // 检测系统主题偏好
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.className = prefersDark ? 'dark-mode' : '';
+}
+
+// 监听系统主题变化
+function listenForSystemThemeChanges() {
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    darkModeMediaQuery.addEventListener('change', (e) => {
+        document.body.className = e.matches ? 'dark-mode' : '';
+    });
+}
+
 
 // 字符计数和自动翻译
 sourceText.addEventListener('input', () => {
@@ -58,6 +74,7 @@ sourceText.addEventListener('paste', () => {
         triggerAutoTranslate();
     }, 10);
 });
+
 
 // 语言切换功能
 swapBtn.addEventListener('click', () => {
@@ -492,6 +509,10 @@ function startInputCheckInterval() {
 
 // 页面加载时加载配置
 window.addEventListener('load', () => {
+    // 初始化主题
+    initTheme();
+    listenForSystemThemeChanges();
+    
     setDefaultLanguages();
     loadConfig();
     // 设置初始高度
