@@ -1,4 +1,10 @@
 /node_modules
 pnpm-lock.yaml
-
 /.claude
+dist/
+build/
+*.log
+*.tmp
+*.temp
+.DS_Store
+output.html

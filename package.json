@@ -4,7 +4,8 @@
   "description": "简单翻译服务器，提供JWT token生成和静态文件服务",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "html-inline -i index.html -o output.html"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
@@ -17,10 +18,9 @@
     "translation",
     "jwt",
     "token",
-    "simple"
+    "simple",
+    "build"
   ],
-  "author": "",
-  "license": "MIT",
   "env": {
     "API_KEY": "您的API密钥，格式为 id.secret"
   }
