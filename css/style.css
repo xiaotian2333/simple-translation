@@ -1,306 +1,561 @@
-/* 深色模式变量 */
+/* ====================== CSS变量定义 ====================== */
+/* 浅色模式主题变量 - 定义全局颜色和样式变量 */
 :root {
+    /* 基础颜色 */
     --bg-color: #f5f5f5;
+    /* 页面背景色 */
     --text-color: #333;
+    /* 主要文本颜色 */
     --container-bg: white;
+    /* 容器背景色 */
     --border-color: #ddd;
-    --shadow-color: rgba(0,0,0,0.1);
+    /* 边框颜色 */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    /* 阴影颜色 */
+
+    /* 主题色 */
     --primary-color: #1890ff;
+    /* 主要按钮和链接颜色 */
     --primary-hover: #40a9ff;
+    /* 主要按钮悬停颜色 */
+
+    /* 状态颜色 */
     --success-color: #52c41a;
+    /* 成功状态颜色 */
     --success-hover: #73d13d;
+    /* 成功状态悬停颜色 */
     --error-color: #ff4d4f;
+    /* 错误状态颜色 */
+
+    /* 文本颜色层次 */
     --secondary-text: #666;
+    /* 次要文本颜色 */
     --tertiary-text: #999;
+    /* 第三级文本颜色 */
+
+    /* 输入框颜色 */
     --input-bg: white;
+    /* 输入框背景色 */
     --result-bg: #fafafa;
+    /* 结果区域背景色 */
+
+    /* 状态背景色 */
     --status-bg: #f0f0f0;
+    /* 普通状态背景色 */
     --success-bg: #f6ffed;
+    /* 成功状态背景色 */
     --error-bg: #fff2f0;
+    /* 错误状态背景色 */
 }
 
-/* 深色模式样式 */
+/* 深色模式样式 - 当body具有dark-mode类时应用深色主题 */
 body.dark-mode {
+    /* 基础颜色 */
     --bg-color: #1a1a1a;
+    /* 深色页面背景 */
     --text-color: #e0e0e0;
+    /* 浅色文本 */
     --container-bg: #2d2d2d;
+    /* 深色容器背景 */
     --border-color: #444;
-    --shadow-color: rgba(0,0,0,0.3);
+    /* 深色边框 */
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    /* 更深的阴影 */
+
+    /* 主题色 */
     --primary-color: #4dabf7;
+    /* 深色主题中的主要颜色 */
     --primary-hover: #339af0;
+    /* 深色主题中的悬停颜色 */
+
+    /* 状态颜色 */
     --success-color: #51cf66;
+    /* 深色主题中的成功颜色 */
     --success-hover: #40c057;
+    /* 深色主题中的成功悬停颜色 */
     --error-color: #ff6b6b;
+    /* 深色主题中的错误颜色 */
+
+    /* 文本颜色层次 */
     --secondary-text: #b0b0b0;
+    /* 深色主题中的次要文本 */
     --tertiary-text: #888;
+    /* 深色主题中的第三级文本 */
+
+    /* 输入框颜色 */
     --input-bg: #1e1e1e;
+    /* 深色输入框背景 */
     --result-bg: #262626;
+    /* 深色结果区域背景 */
+
+    /* 状态背景色 */
     --status-bg: #404040;
+    /* 深色状态背景 */
     --success-bg: #2d4a2b;
+    /* 深色成功状态背景 */
     --error-bg: #4a2d2d;
+    /* 深色错误状态背景 */
 }
 
+/* ====================== 全局样式重置 ====================== */
+/* 全局样式重置 - 清除默认边距和设置盒模型 */
 * {
     margin: 0;
+    /* 清除所有元素的外边距 */
     padding: 0;
+    /* 清除所有元素的内边距 */
     box-sizing: border-box;
+    /* 设置盒模型为border-box，包含padding和border */
 }
 
+/* ====================== 页面主体样式 ====================== */
+/* 页面主体样式 - 设置字体、背景色和主题切换过渡效果 */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    /* 系统字体栈 */
     background-color: var(--bg-color);
+    /* 使用CSS变量的背景色 */
     color: var(--text-color);
+    /* 使用CSS变量的文本颜色 */
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* 主题切换时的平滑过渡效果 */
 }
 
+/* 主容器样式 - 限制页面最大宽度并居中显示 */
 .container {
     max-width: 1400px;
+    /* 最大宽度限制 */
     margin: 0 auto;
+    /* 水平居中 */
     padding: 20px;
+    /* 内边距 */
 }
 
+/* ====================== 页面头部样式 ====================== */
+/* 页面头部容器 - 包含标题和副标题 */
 .header {
     text-align: center;
+    /* 文本居中对齐 */
     margin-bottom: 30px;
+    /* 底部外边距 */
     padding: 20px 0;
+    /* 上下内边距 */
     position: relative;
+    /* 相对定位 */
 }
 
+/* 主标题样式 */
 .header h1 {
     font-size: 2.5em;
+    /* 标题字体大小 */
     color: var(--primary-color);
+    /* 使用主题色 */
     margin-bottom: 10px;
+    /* 底部外边距 */
 }
 
+/* 副标题样式 */
 .header p {
     font-size: 1.2em;
+    /* 副标题字体大小 */
     color: var(--secondary-text);
+    /* 使用次要文本颜色 */
 }
 
 
+/* ====================== 翻译工具容器样式 ====================== */
+/* 翻译主容器 - 包含所有翻译功能的卡片式容器 */
 .translate-container {
     background: var(--container-bg);
+    /* 容器背景色 */
     border-radius: 12px;
+    /* 圆角边框 */
     padding: 20px;
+    /* 内边距 */
     box-shadow: 0 2px 8px var(--shadow-color);
+    /* 阴影效果 */
 }
 
+/* 语言选择器容器 - 包含源语言、目标语言和交换按钮 */
 .language-selector {
     display: flex;
+    /* 弹性布局 */
     justify-content: space-between;
+    /* 两端对齐 */
     align-items: center;
+    /* 垂直居中 */
     margin-bottom: 20px;
+    /* 底部外边距 */
     flex-wrap: wrap;
+    /* 允许换行 */
     gap: 10px;
+    /* 元素间距 */
 }
 
+/* 模型选择器容器 - 包含模型选择下拉框和token状态 */
 .model-selector {
     display: flex;
+    /* 弹性布局 */
     align-items: center;
+    /* 垂直居中 */
     margin-bottom: 20px;
+    /* 底部外边距 */
     gap: 10px;
+    /* 元素间距 */
     flex-wrap: wrap;
+    /* 允许换行 */
 }
 
+/* 模型选择标签样式 */
 .model-label {
     font-size: 14px;
+    /* 标签字体大小 */
     color: var(--secondary-text);
+    /* 次要文本颜色 */
     font-weight: 500;
+    /* 字体粗细 */
 }
 
+/* 模型选择下拉框样式 */
 .model-select {
     padding: 8px 12px;
+    /* 内边距 */
     border: 1px solid var(--border-color);
+    /* 边框样式 */
     border-radius: 6px;
+    /* 圆角边框 */
     font-size: 14px;
+    /* 字体大小 */
     background: var(--input-bg);
+    /* 输入框背景色 */
     color: var(--text-color);
+    /* 文本颜色 */
     cursor: pointer;
+    /* 鼠标指针样式 */
     min-width: 150px;
+    /* 最小宽度 */
 }
 
+/* Token状态显示样式 */
 .token-status {
     font-size: 12px;
+    /* 字体大小 */
     color: var(--tertiary-text);
+    /* 第三级文本颜色 */
     padding: 4px 8px;
+    /* 内边距 */
     background: var(--status-bg);
+    /* 状态背景色 */
     border-radius: 4px;
+    /* 圆角边框 */
 }
 
+/* Token有效状态样式 */
 .token-status.valid {
     color: var(--success-color);
+    /* 成功文本颜色 */
     background: var(--success-bg);
+    /* 成功背景色 */
 }
 
+/* Token过期状态样式 */
 .token-status.expired {
     color: var(--error-color);
+    /* 错误文本颜色 */
     background: var(--error-bg);
+    /* 错误背景色 */
 }
 
+/* 语言选择下拉框样式 */
 .language-select {
     padding: 10px 15px;
+    /* 内边距 */
     border: 1px solid var(--border-color);
+    /* 边框样式 */
     border-radius: 6px;
+    /* 圆角边框 */
     font-size: 16px;
+    /* 字体大小 */
     background: var(--input-bg);
+    /* 输入框背景色 */
     color: var(--text-color);
+    /* 文本颜色 */
     cursor: pointer;
+    /* 鼠标指针样式 */
     min-width: 120px;
+    /* 最小宽度 */
 }
 
+/* 语言交换按钮样式 */
 .swap-btn {
     background: var(--primary-color);
+    /* 按钮背景色 */
     color: white;
+    /* 按钮文字颜色 */
     border: none;
+    /* 无边框 */
     border-radius: 50%;
+    /* 圆形按钮 */
     width: 40px;
+    /* 按钮宽度 */
     height: 40px;
+    /* 按钮高度 */
     cursor: pointer;
+    /* 鼠标指针样式 */
     font-size: 18px;
+    /* 字体大小 */
     transition: background 0.3s;
+    /* 背景色过渡效果 */
 }
 
+/* 交换按钮悬停效果 */
 .swap-btn:hover {
     background: var(--primary-hover);
+    /* 悬停时的背景色 */
 }
 
+/* ====================== 翻译内容区域样式 ====================== */
+/* 翻译内容容器 - 包含输入和输出面板 */
 .translate-content {
     display: flex;
+    /* 弹性布局 */
     gap: 20px;
+    /* 面板间距 */
     margin-bottom: 20px;
+    /* 底部外边距 */
 }
 
+/* 输入面板和输出面板的公共样式 */
 .input-panel,
 .output-panel {
     flex: 1;
+    /* 等分宽度 */
     display: flex;
+    /* 弹性布局 */
     flex-direction: column;
+    /* 垂直排列 */
 }
 
+/* 面板头部容器样式 */
 .panel-header {
     display: flex;
+    /* 弹性布局 */
     justify-content: space-between;
+    /* 两端对齐 */
     align-items: center;
+    /* 垂直居中 */
     margin-bottom: 10px;
+    /* 底部外边距 */
 }
 
+/* 面板标题样式 */
 .panel-title {
     font-size: 16px;
+    /* 标题字体大小 */
     font-weight: 500;
+    /* 字体粗细 */
     color: var(--secondary-text);
+    /* 次要文本颜色 */
 }
 
+/* 字符计数显示样式 */
 .char-count {
     font-size: 12px;
+    /* 字体大小 */
     color: var(--tertiary-text);
+    /* 第三级文本颜色 */
 }
 
+/* Token计数显示样式 */
 .token-count {
     font-size: 12px;
+    /* 字体大小 */
     color: var(--tertiary-text);
+    /* 第三级文本颜色 */
 }
 
+/* 文本输入区域样式 */
 .text-area {
     width: 100%;
+    /* 宽度100% */
     min-height: 100px;
+    /* 最小高度 */
     max-height: 600px;
+    /* 最大高度 */
     padding: 15px;
+    /* 内边距 */
     border: 1px solid var(--border-color);
+    /* 边框样式 */
     border-radius: 8px;
+    /* 圆角边框 */
     font-size: 16px;
+    /* 字体大小 */
     resize: none;
+    /* 禁止手动调整大小 */
     font-family: inherit;
+    /* 继承字体 */
     background: var(--input-bg);
+    /* 输入框背景色 */
     color: var(--text-color);
+    /* 文本颜色 */
     overflow-y: auto;
+    /* 垂直滚动条 */
     transition: height 0.2s ease;
+    /* 高度变化过渡效果 */
 }
 
+/* 文本输入区域聚焦状态 */
 .text-area:focus {
     outline: none;
+    /* 移除默认聚焦轮廓 */
     border-color: var(--primary-color);
+    /* 聚焦时边框颜色 */
 }
 
+/* 翻译结果显示区域样式 */
 .result-area {
     width: 100%;
+    /* 宽度100% */
     min-height: 100px;
+    /* 最小高度 */
     max-height: 600px;
+    /* 最大高度 */
     padding: 15px;
+    /* 内边距 */
     border: 1px solid var(--border-color);
+    /* 边框样式 */
     border-radius: 8px;
+    /* 圆角边框 */
     font-size: 16px;
+    /* 字体大小 */
     background: var(--result-bg);
+    /* 结果区域背景色 */
     resize: none;
+    /* 禁止手动调整大小 */
     font-family: inherit;
+    /* 继承字体 */
     line-height: 1.5;
+    /* 行高 */
     overflow-y: auto;
+    /* 垂直滚动条 */
     transition: height 0.2s ease;
+    /* 高度变化过渡效果 */
     white-space: pre-wrap;
+    /* 保留换行和空格 */
     word-wrap: break-word;
+    /* 长单词换行 */
 }
 
-/* 打字机光标效果 */
+/* ====================== 特殊效果和按钮样式 ====================== */
+/* 打字机光标效果 - 用于翻译结果的打字机动画 */
 .typing-cursor::after {
     content: '|';
+    /* 光标字符 */
     animation: blink 1s infinite;
+    /* 闪烁动画 */
     color: var(--primary-color);
+    /* 光标颜色 */
 }
 
+/* 光标闪烁动画关键帧 */
 @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    /* 显示状态 */
+    51%,
+    100% {
+        opacity: 0;
+    }
+
+    /* 隐藏状态 */
 }
 
-
+/* 复制按钮样式 */
 .copy-btn {
     background: var(--success-color);
+    /* 按钮背景色 */
     color: white;
+    /* 按钮文字颜色 */
     border: none;
+    /* 无边框 */
     padding: 8px 16px;
+    /* 内边距 */
     border-radius: 4px;
+    /* 圆角边框 */
     cursor: pointer;
+    /* 鼠标指针样式 */
     font-size: 14px;
+    /* 字体大小 */
 }
 
+/* 复制按钮悬停效果 */
 .copy-btn:hover {
     background: var(--success-hover);
+    /* 悬停时的背景色 */
 }
 
+/* ====================== 加载状态样式 ====================== */
+/* 加载提示容器 - 默认隐藏 */
 .loading {
     display: none;
+    /* 默认隐藏 */
     text-align: center;
+    /* 文本居中 */
     color: var(--secondary-text);
+    /* 次要文本颜色 */
     padding: 20px;
+    /* 内边距 */
 }
 
+/* 加载提示显示状态 */
 .loading.show {
     display: block;
+    /* 显示为块级元素 */
 }
 
-
+/* ====================== 响应式设计样式 ====================== */
+/* 移动端适配 - 屏幕宽度小于768px时的样式 */
 @media (max-width: 768px) {
+
+    /* 主容器样式调整 */
     .container {
         padding: 10px;
+        /* 减少内边距 */
     }
-    
+
+    /* 翻译容器样式调整 */
     .translate-container {
         padding: 15px;
+        /* 减少内边距 */
     }
-    
+
+    /* 翻译内容区域改为垂直排列 */
     .translate-content {
         flex-direction: column;
+        /* 垂直排列 */
     }
-    
+
+    /* 语言选择器改为垂直排列 */
     .language-selector {
         flex-direction: column;
+        /* 垂直排列 */
         gap: 10px;
+        /* 元素间距 */
     }
-    
+
+    /* 交换按钮居中显示 */
     .swap-btn {
         align-self: center;
+        /* 水平居中 */
     }
-    
+
+    /* 配置行改为垂直排列 */
     .config-row {
         flex-direction: column;
+        /* 垂直排列 */
     }
 }
