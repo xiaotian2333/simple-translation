@@ -23,5 +23,8 @@
   ],
   "env": {
     "API_KEY": "您的API密钥，格式为 id.secret"
+  },
+  "devDependencies": {
+    "html-inline": "^1.2.0"
   }
 }
