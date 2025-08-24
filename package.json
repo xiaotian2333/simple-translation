@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "html-inline -i index.html -o output.html"
+    "build": "uglifyjs js/script.js -m -o js/script.min.js && node build.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
@@ -25,6 +25,6 @@
     "API_KEY": "您的API密钥，格式为 id.secret"
   },
   "devDependencies": {
-    "html-inline": "^1.2.0"
+    "uglify-js": "^3.19.3"
   }
 }
