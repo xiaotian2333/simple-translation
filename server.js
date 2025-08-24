@@ -145,7 +145,7 @@ const server = http.createServer((req, res) => {
     // ====================== 请求日志记录 ======================
     // 获取用户IP并记录请求信息
     const ip = getip(req);
-    logger.http(`请求来自IP: ${ip}`);
+    logger.http(`请求 ${req.method} ${req.url} 来自 IP: ${ip}`);
 
     // ====================== 路由处理 ======================
 
