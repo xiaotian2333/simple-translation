@@ -8,3 +8,4 @@ build/
 *.temp
 .DS_Store
 output.html
+*.min.js

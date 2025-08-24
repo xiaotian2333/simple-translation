@@ -90,15 +90,6 @@ function compressHTML(html) {
         // 移除注释 (保留重要的条件注释)
         .replace(/<!--[\s\S]*?(?<!<!\-\-)-->/g, '')
         
-        // 压缩空白字符
-        .replace(/\s+/g, ' ')
-        
-        // 移除标签间的空格
-        .replace(/>\s+</g, '><')
-        
-        // 移除行首行尾空格
-        .replace(/^\s+|\s+$/g, '')
-        
         // 压缩CSS和JavaScript (在style和script标签内)
         .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, function(match, content) {
             return '<style>' + compressCSS(content) + '</style>';
@@ -107,14 +98,14 @@ function compressHTML(html) {
             return '<script>' + content + '</script>';
         })
         
-        // 移除属性值的引号 (当安全时)
-        .replace(/([a-zA-Z-]+)=["']([^"'<>]*)["']/g, function(match, attr, value) {
-            // 只对安全的属性值移除引号
-            if (/^[a-zA-Z0-9_-]+$/.test(value)) {
-                return attr + '=' + value;
-            }
-            return match;
-        })
+        // 压缩空白字符
+        .replace(/\s+/g, ' ')
+        
+        // 移除标签间的空格
+        .replace(/>\s+</g, '><')
+        
+        // 移除行首行尾空格
+        .replace(/^\s+|\s+$/g, '')
         
         // 压缩布尔属性
         .replace(/checked="checked"/g, 'checked')
