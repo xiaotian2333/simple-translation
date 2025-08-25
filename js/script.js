@@ -480,7 +480,7 @@ async function getApiToken() {
         if (data.apiToken && data.expireTime) {
             // 保存token和过期时间
             currentToken = data.apiToken;
-            tokenExpireTime = Date.now() + (data.expireTime * 1000);
+            tokenExpireTime = data.expireTime * 1000; // 直接使用后端返回的时间戳（转换为毫秒）
             tokenFetchFailed = false; // 重置失败状态
             updateTokenStatus();
             return currentToken;

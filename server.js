@@ -21,7 +21,7 @@ const path = require('path')          // 路径处理模块
 // ====================== 服务器配置 ======================
 const PORT = 7860                      // 服务器监听端口
 const EXPIRE_TIME = 300                // Token过期时间（秒）
-const API_KEY = process.env.API_KEY    // API密钥（从环境变量获取）
+const API_KEY = process.env.API_KEY || '123456.123456'    // API密钥（从环境变量获取）
 const log_level = 'http';              // 日志级别：debug/http/info/warn/error
 const log_file = false;                // 是否启用文件日志
 const plugin_name = '简单翻译'         // 插件名称，用于日志文件名
@@ -115,7 +115,8 @@ function generateToken(apiKey, expSeconds) {
  * @returns {string} 用户IP地址
  */
 function getip(req) {
-    const ip = req.headers['x-forwarded-for'] ||  // 代理服务器转发的IP
+    const ip = req.headers['edgeone-user-ip'] || // 腾讯EO的自定义IP头
+        req.headers['x-forwarded-for'] ||  // 代理服务器转发的IP
         req.socket.remoteAddress ||        // 直接连接的IP
         req.ip ||                          // Express框架的IP
         'unknown';                         // 无法获取时的默认值
@@ -156,9 +157,10 @@ const server = http.createServer((req, res) => {
         try {
             // 生成JWT token
             const token = generateToken(API_KEY, EXPIRE_TIME)
+            const currentTime = Math.round(Date.now() / 1000) // 当前时间戳（秒）
             const responseData = {
                 apiToken: token,                    // 生成的JWT token
-                expireTime: EXPIRE_TIME            // token过期时间（秒）
+                expireTime: currentTime + EXPIRE_TIME // token过期时间戳（秒）
             }
 
             // 成功响应
@@ -259,7 +261,7 @@ const hasOutputFile = fs.existsSync(outputPath)
  * 启动HTTP服务器
  * 监听指定端口，提供Web服务
  */
-server.listen(PORT, () => {    
+server.listen(PORT, () => {
     // 输出文件检查结果
     if (!hasOutputFile) {
         logger.warn('未找到output.html文件，将使用index.html提供对外服务')
