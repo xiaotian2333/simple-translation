@@ -13,5 +13,6 @@
     "user_prompt": "Please translate the following text into {{to}}: \n{{text}}",
     "token_api": "https://Translate.xt-url.com/get_token",
     "thinking": "disabled",
-    "thinkPrint": false
+    "thinkPrint": false,
+    "wait_time": 1000
 }

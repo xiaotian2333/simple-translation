@@ -242,7 +242,7 @@ function triggerAutoTranslate() {
         currentAbortController = null;
     }
 
-    // 设置新的防抖定时器，延迟500ms执行翻译
+    // 设置新的防抖定时器，延迟配置文件设置的时间执行翻译，单位ms
     translateTimeout = setTimeout(async () => {
         // 显示加载状态
         loading.classList.add('show');
@@ -263,7 +263,7 @@ function triggerAutoTranslate() {
         } finally {
             loading.classList.remove('show');
         }
-    }, 500);
+    }, config.wait_time);
 }
 
 /**
