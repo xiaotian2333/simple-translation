@@ -10,6 +10,12 @@
 
 ## 使用方法
 
+### 在线使用
+
+电脑端推荐直接访问 [https://translate.xt-url.com](https://translate.xt-url.com/)  
+
+提供安卓端网页套壳APP [立即下载](https://github.com/xiaotian2333/simple-translation/releases/download/V1.0/app.apk)
+
 ### 源码启动  
 
 1. 克隆此项目
