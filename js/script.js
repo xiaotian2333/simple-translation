@@ -25,6 +25,10 @@ const settingsHeader = document.getElementById('settingsHeader');    // 设置�
 const settingsContent = document.getElementById('settingsContent');  // 设置面板内容
 const settingsToggle = document.getElementById('settingsToggle');      // 设置折叠按钮
 
+// API Key相关元素
+const apiKeyInput = document.getElementById('apiKeyInput');          // API Key输入框
+const apiKeySave = document.getElementById('apiKeySave');              // API Key保存按钮
+
 /**
  * ====================== 工具函数 ======================
  */
@@ -198,12 +202,56 @@ settingsHeader.addEventListener('click', () => {
 });
 
 /**
+ * 保存API Key到localStorage
+ */
+function saveApiKey() {
+    const apiKey = apiKeyInput.value.trim();
+    
+    // 保存到localStorage（不验证格式）
+    localStorage.setItem('apiKey', apiKey);
+    
+    // 显示保存成功状态
+    apiKeySave.classList.add('success');
+    apiKeySave.textContent = '已保存';
+    
+    // 2秒后恢复按钮状态
+    setTimeout(() => {
+        apiKeySave.classList.remove('success');
+        apiKeySave.textContent = '保存';
+    }, 2000);
+}
+
+/**
+ * 从localStorage加载API Key
+ */
+function loadApiKey() {
+    const savedApiKey = localStorage.getItem('apiKey');
+    if (savedApiKey) {
+        apiKeyInput.value = savedApiKey;
+    }
+}
+
+/**
  * 模型选择事件监听器
  * 用户选择不同模型时保存到localStorage
  */
 modelSelect.addEventListener('change', () => {
     // 保存用户选择的模型到localStorage
     localStorage.setItem('preferredModel', modelSelect.value);
+});
+
+/**
+ * API Key保存按钮事件监听器
+ */
+apiKeySave.addEventListener('click', saveApiKey);
+
+/**
+ * API Key输入框回车事件监听器
+ */
+apiKeyInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        saveApiKey();
+    }
 });
 
 /**
@@ -725,6 +773,9 @@ window.addEventListener('load', () => {
 
     // 设置默认语言
     setDefaultLanguages();
+
+    // 加载保存的API Key
+    loadApiKey();
 
     // 加载应用配置
     loadConfig();

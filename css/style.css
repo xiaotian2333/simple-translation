@@ -264,16 +264,10 @@ body {
 
 /* 设置面板展开状态 */
 .settings-content.expanded {
-    max-height: 100px;
+    max-height: 200px;
     /* 展开时的最大高度 */
     padding: 16px;
     /* 展开时的内边距 */
-}
-
-/* 设置面板展开时折叠按钮旋转 */
-.settings-content.expanded + .settings-toggle {
-    transform: rotate(180deg);
-    /* 旋转180度 */
 }
 
 /* 模型选择器容器 - 包含模型选择下拉框 */
@@ -286,7 +280,92 @@ body {
     /* 元素间距 */
     flex-wrap: wrap;
     /* 允许换行 */
+    margin-bottom: 15px;
+    /* 底部外边距 */
 }
+
+/* API Key容器样式 */
+.api-key-container {
+    display: flex;
+    /* 弹性布局 */
+    align-items: center;
+    /* 垂直居中 */
+    gap: 10px;
+    /* 元素间距 */
+    flex-wrap: wrap;
+    /* 允许换行 */
+}
+
+/* API Key标签样式 */
+.api-key-label {
+    font-size: 14px;
+    /* 标签字体大小 */
+    color: var(--secondary-text);
+    /* 次要文本颜色 */
+    font-weight: 500;
+    /* 字体粗细 */
+}
+
+/* API Key输入框样式 */
+.api-key-input {
+    flex: 1;
+    /* 占用剩余空间 */
+    padding: 8px 12px;
+    /* 内边距 */
+    border: 1px solid var(--border-color);
+    /* 边框样式 */
+    border-radius: 6px;
+    /* 圆角边框 */
+    font-size: 14px;
+    /* 字体大小 */
+    background: var(--input-bg);
+    /* 输入框背景色 */
+    color: var(--text-color);
+    /* 文本颜色 */
+    max-width: 300px;
+    /* 最小宽度 */
+}
+
+/* API Key输入框聚焦状态 */
+.api-key-input:focus {
+    outline: none;
+    /* 移除默认聚焦轮廓 */
+    border-color: var(--primary-color);
+    /* 聚焦时边框颜色 */
+}
+
+/* API Key保存按钮样式 */
+.api-key-save {
+    padding: 8px 16px;
+    /* 内边距 */
+    background: var(--primary-color);
+    /* 按钮背景色 */
+    color: white;
+    /* 按钮文字颜色 */
+    border: none;
+    /* 无边框 */
+    border-radius: 6px;
+    /* 圆角边框 */
+    font-size: 14px;
+    /* 字体大小 */
+    cursor: pointer;
+    /* 鼠标指针样式 */
+    transition: background 0.3s;
+    /* 背景色过渡效果 */
+}
+
+/* API Key保存按钮悬停效果 */
+.api-key-save:hover {
+    background: var(--primary-hover);
+    /* 悬停时的背景色 */
+}
+
+/* API Key保存成功状态 */
+.api-key-save.success {
+    background: var(--success-color);
+    /* 成功状态背景色 */
+}
+
 
 /* 模型选择标签样式 */
 .model-label {
@@ -633,11 +712,5 @@ body {
     .swap-btn {
         align-self: center;
         /* 水平居中 */
-    }
-
-    /* 配置行改为垂直排列 */
-    .config-row {
-        flex-direction: column;
-        /* 垂直排列 */
     }
 }
