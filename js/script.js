@@ -62,10 +62,10 @@ function escapeHtml(text) {
 function showErrorToast(message, duration = 5000) {
     // 设置错误消息
     errorMessage.textContent = message;
-    
+
     // 显示错误提示
     errorToast.classList.add('show');
-    
+
     // 设置自动隐藏定时器
     setTimeout(() => {
         hideErrorToast();
@@ -222,7 +222,7 @@ copyBtn.addEventListener('click', () => {
 settingsHeader.addEventListener('click', () => {
     // 切换展开状态
     settingsContent.classList.toggle('expanded');
-    
+
     // 更新折叠按钮图标
     if (settingsContent.classList.contains('expanded')) {
         settingsToggle.textContent = '▲';
@@ -236,17 +236,17 @@ settingsHeader.addEventListener('click', () => {
  */
 function saveApiKey() {
     const apiKey = apiKeyInput.value.trim();
-    
+
     // 保存到localStorage（不验证格式）
     localStorage.setItem('apiKey', apiKey);
-    
+
     // 显示保存成功状态
     apiKeySave.classList.add('success');
     apiKeySave.textContent = '已保存';
-    
+
     // 立即更新token状态显示
     updateTokenStatus();
-    
+
     // 2秒后恢复按钮状态
     setTimeout(() => {
         apiKeySave.classList.remove('success');
@@ -370,8 +370,8 @@ function triggerAutoTranslate() {
             await translateWithGLM(text, sourceLang.value, targetLang.value);
             // 流式传输会在函数内部实时显示，无需额外处理
         } catch (error) {
-            // 如果是取消错误，不显示错误信息
-            if (error.message !== '翻译被取消') {
+            // 用数组includes简化判断，直接处理非取消错误
+            if (!['signal is aborted without reason', '翻译被取消'].includes(error?.message)) {
                 console.error('翻译失败:', error);
                 tokenCount.style.display = 'none';
                 showErrorToast(`翻译失败: ${error.message}`);
@@ -444,7 +444,7 @@ async function translateWithGLM(text, from, to) {
     // 发送HTTP请求到智谱GLM API
     // 如果用户配置了API密钥，则使用API密钥认证，否则使用JWT token
     const authorization = token ? `Bearer ${token}` : `Bearer ${localStorage.getItem('apiKey')}`;
-    
+
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -682,7 +682,7 @@ async function getValidToken() {
     if (hasApiKeyConfigured()) {
         return '';
     }
-    
+
     if (!isTokenValid() || tokenFetchFailed) {
         await getApiToken();
     }
@@ -702,7 +702,7 @@ function initModelSelector() {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
-        
+
         // 从localStorage加载用户保存的模型偏好
         const savedModel = localStorage.getItem('preferredModel');
         if (savedModel && config.model.includes(savedModel)) {
