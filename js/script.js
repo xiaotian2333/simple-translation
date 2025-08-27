@@ -214,6 +214,9 @@ function saveApiKey() {
     apiKeySave.classList.add('success');
     apiKeySave.textContent = '已保存';
     
+    // 立即更新token状态显示
+    updateTokenStatus();
+    
     // 2秒后恢复按钮状态
     setTimeout(() => {
         apiKeySave.classList.remove('success');
@@ -362,7 +365,7 @@ async function translateWithGLM(text, from, to) {
 
     const url = config.api_url;
 
-    // 获取有效的Token，如果过期会自动刷新
+    // 获取有效的Token，如果用户配置了API密钥则使用空字符串
     const token = await getValidToken();
 
     // 构建提示词，使用语言名称映射
@@ -404,10 +407,13 @@ async function translateWithGLM(text, from, to) {
     };
 
     // 发送HTTP请求到智谱GLM API
+    // 如果用户配置了API密钥，则使用API密钥认证，否则使用JWT token
+    const authorization = token ? `Bearer ${token}` : `Bearer ${localStorage.getItem('apiKey')}`;
+    
     const response = await fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${token}`,           // JWT token认证
+            'Authorization': authorization,               // API密钥或JWT token认证
             'Content-Type': 'application/json'            // JSON格式
         },
         body: JSON.stringify(requestBody),               // 请求体
@@ -582,11 +588,24 @@ function isTokenValid() {
 }
 
 /**
+ * 检查是否已配置API密钥
+ * @returns {boolean} 是否已配置API密钥
+ */
+function hasApiKeyConfigured() {
+    const apiKey = localStorage.getItem('apiKey');
+    return apiKey && apiKey.trim() !== '';
+}
+
+/**
  * 更新Token状态显示
  * 根据token的不同状态显示不同的文本和样式
  */
 function updateTokenStatus() {
-    if (tokenFetchFailed) {
+    if (hasApiKeyConfigured()) {
+        // 已配置API密钥状态
+        tokenStatus.textContent = 'Token: 已配置key';
+        tokenStatus.className = 'token-status configured';
+    } else if (tokenFetchFailed) {
         // Token获取失败状态
         tokenStatus.textContent = 'Token: 获取失败';
         tokenStatus.className = 'token-status expired'; // 使用与过期一致的红色
@@ -611,9 +630,15 @@ function updateTokenStatus() {
 /**
  * 获取有效的Token
  * 检查当前token是否有效，如果无效或获取失败则重新获取
- * @returns {Promise<string>} 有效的JWT token
+ * 如果用户已配置API密钥，则返回空字符串
+ * @returns {Promise<string>} 有效的JWT token或空字符串
  */
 async function getValidToken() {
+    // 如果用户已配置API密钥，直接返回空字符串
+    if (hasApiKeyConfigured()) {
+        return '';
+    }
+    
     if (!isTokenValid() || tokenFetchFailed) {
         await getApiToken();
     }
@@ -663,8 +688,10 @@ async function loadConfig() {
         // 初始化模型选择器
         initModelSelector();
 
-        // 初始获取Token
-        await getApiToken();
+        // 如果用户未配置API密钥，则获取Token
+        if (!hasApiKeyConfigured()) {
+            await getApiToken();
+        }
 
         // 定时更新Token状态显示（每秒更新一次）
         setInterval(updateTokenStatus, 1000);

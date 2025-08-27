@@ -427,6 +427,14 @@ body {
     /* 错误背景色 */
 }
 
+/* Token已配置key状态样式 */
+.token-status.configured {
+    color: var(--primary-color);
+    /* 主要文本颜色（蓝色） */
+    background: var(--status-bg);
+    /* 状态背景色 */
+}
+
 /* 语言选择下拉框样式 */
 .language-select {
     padding: 10px 15px;
