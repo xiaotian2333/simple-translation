@@ -200,22 +200,25 @@ const server = http.createServer((req, res) => {
         // 根据文件扩展名设置正确的MIME类型
         switch (extname) {
             case '.js':
-                contentType = 'text/javascript'      // JavaScript文件
+                contentType = 'text/javascript'// JavaScript文件
                 break
             case '.css':
-                contentType = 'text/css'             // CSS样式文件
+                contentType = 'text/css'// CSS样式文件
                 break
             case '.json':
-                contentType = 'application/json'     // JSON配置文件
+                contentType = 'application/json'// JSON配置文件
                 break
             case '.png':
-                contentType = 'image/png'            // PNG图片
+                contentType = 'image/png'// PNG图片
                 break
             case '.jpg':
-                contentType = 'image/jpg'            // JPG图片
+                contentType = 'image/jpg'// JPG图片
                 break
             case '.ico':
-                contentType = 'image/x-icon'        // 网站图标
+                contentType = 'image/x-icon'// 网站图标
+                break
+            case '.svg':
+                contentType = 'image/svg+xml;charset=utf-8'// SVG图片
                 break
         }
 

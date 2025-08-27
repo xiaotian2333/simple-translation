@@ -14,5 +14,20 @@
     "token_api": "https://Translate.xt-url.com/get_token",
     "thinking": "disabled",
     "thinkPrint": false,
-    "wait_time": 1000
+    "wait_time": 1000,
+    "About": {
+        "logo": "/logo/logo.svg",
+        "description": "",
+        "author": "小天",
+        "links": [
+            {
+                "name": "GitHub",
+                "url": "https://github.com/xiaotian2333/simple-translation"
+            },
+            {
+                "name": "QQ群",
+                "url": "https://jq.qq.com/?k=fjSGhscz"
+            }
+        ]
+    }
 }

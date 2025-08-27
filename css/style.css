@@ -788,3 +788,202 @@ body {
     background: var(--error-color);
     color: white;
 }
+
+/* ====================== 关于按钮和弹窗样式 ====================== */
+/* 关于按钮容器 */
+.about-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 关于按钮样式 */
+.about-btn {
+    padding: 8px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+/* 关于按钮悬停效果 */
+.about-btn:hover {
+    background: var(--primary-hover);
+}
+
+/* 关于弹窗容器 - 默认隐藏 */
+.about-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 关于弹窗显示状态 */
+.about-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* 关于弹窗内容容器 */
+.about-modal-content {
+    background: var(--container-bg);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+/* 关于弹窗显示时的内容容器 */
+.about-modal.show .about-modal-content {
+    transform: scale(1);
+}
+
+/* 关于弹窗头部 */
+.about-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 关于弹窗标题 */
+.about-modal-header h2 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 20px;
+}
+
+/* 关于弹窗关闭按钮 */
+.about-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--tertiary-text);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+/* 关于弹窗关闭按钮悬停效果 */
+.about-modal-close:hover {
+    background: var(--status-bg);
+    color: var(--text-color);
+}
+
+/* 关于弹窗主体内容 */
+.about-modal-body {
+    padding: 20px;
+}
+
+/* 关于Logo容器 */
+.about-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 关于Logo图片 */
+.about-logo img {
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 8px;
+}
+
+/* 关于信息容器 */
+.about-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 关于描述文本 */
+.about-description {
+    color: var(--secondary-text);
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+/* 关于作者信息 */
+.about-author {
+    color: var(--tertiary-text);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+/* 关于版本信息 */
+.about-version {
+    color: var(--tertiary-text);
+    font-size: 14px;
+}
+
+/* 关于链接容器 */
+.about-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 关于链接样式 */
+.about-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    background: var(--status-bg);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: background-color 0.2s ease;
+}
+
+/* 关于链接悬停效果 */
+.about-link:hover {
+    background: var(--border-color);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    /* 关于弹窗内容容器 */
+    .about-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    /* 关于弹窗头部 */
+    .about-modal-header {
+        padding: 15px;
+    }
+    
+    /* 关于弹窗主体内容 */
+    .about-modal-body {
+        padding: 15px;
+    }
+    
+    /* 关于Logo图片 */
+    .about-logo img {
+        max-width: 60px;
+        max-height: 60px;
+    }
+}

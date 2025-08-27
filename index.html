@@ -58,6 +58,9 @@
                             <input type="password" class="api-key-input" id="apiKeyInput" placeholder="请输入API Key">
                             <button class="api-key-save" id="apiKeySave">保存</button>
                         </div>
+                        <div class="about-container">
+                            <button class="about-btn" id="aboutBtn">关于</button>
+                        </div>
                     </div>
                 </div>
 
@@ -100,6 +103,29 @@
                 <div class="error-toast-content">
                     <span class="error-toast-message" id="errorMessage"></span>
                     <button class="error-toast-close" id="errorClose">&times;</button>
+                </div>
+            </div>
+            
+            <!-- 关于弹窗 -->
+            <div class="about-modal" id="aboutModal">
+                <div class="about-modal-content">
+                    <div class="about-modal-header">
+                        <h2>关于简单翻译</h2>
+                        <button class="about-modal-close" id="aboutModalClose">&times;</button>
+                    </div>
+                    <div class="about-modal-body">
+                        <div class="about-logo" id="aboutLogo">
+                            <!-- Logo将通过JavaScript动态加载 -->
+                        </div>
+                        <div class="about-info">
+                            <p class="about-description" id="aboutDescription"></p>
+                            <p class="about-author" id="aboutAuthor"></p>
+                            <p class="about-version" id="aboutVersion"></p>
+                        </div>
+                        <div class="about-links" id="aboutLinks">
+                            <!-- 链接将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

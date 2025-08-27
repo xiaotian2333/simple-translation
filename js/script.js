@@ -34,6 +34,16 @@ const settingsToggle = document.getElementById('settingsToggle');      // 设置
 const apiKeyInput = document.getElementById('apiKeyInput');          // API Key输入框
 const apiKeySave = document.getElementById('apiKeySave');              // API Key保存按钮
 
+// 关于弹窗相关元素
+const aboutBtn = document.getElementById('aboutBtn');                  // 关于按钮
+const aboutModal = document.getElementById('aboutModal');              // 关于弹窗容器
+const aboutModalClose = document.getElementById('aboutModalClose');    // 关于弹窗关闭按钮
+const aboutLogo = document.getElementById('aboutLogo');                // 关于Logo容器
+const aboutDescription = document.getElementById('aboutDescription');  // 关于描述
+const aboutAuthor = document.getElementById('aboutAuthor');            // 关于作者
+const aboutVersion = document.getElementById('aboutVersion');          // 关于版本
+const aboutLinks = document.getElementById('aboutLinks');              // 关于链接容器
+
 /**
  * ====================== 工具函数 ======================
  */
@@ -77,6 +87,61 @@ function showErrorToast(message, duration = 5000) {
  */
 function hideErrorToast() {
     errorToast.classList.remove('show');
+}
+
+/**
+ * 显示关于弹窗
+ */
+function showAboutModal() {
+    if (!config.About) return;
+
+    // 清空并填充弹窗内容
+    aboutLogo.innerHTML = '';
+    aboutDescription.textContent = '';
+    aboutAuthor.textContent = '';
+    aboutVersion.textContent = '';
+    aboutLinks.innerHTML = '';
+
+    // 加载Logo
+    if (config.About.logo) {
+        const img = document.createElement('img');
+        img.src = config.About.logo;
+        img.alt = 'Logo';
+        aboutLogo.appendChild(img);
+    }
+
+    // 加载描述
+    if (config.About.description) {
+        aboutDescription.textContent = config.About.description;
+    }
+
+    // 加载作者信息
+    if (config.About.author) {
+        aboutAuthor.textContent = `作者：${config.About.author}`;
+    }
+
+    // 加载链接
+    if (config.About.links && Array.isArray(config.About.links)) {
+        config.About.links.forEach(link => {
+            const linkElement = document.createElement('a');
+            linkElement.href = link.url;
+            linkElement.textContent = link.name;
+            linkElement.target = '_blank';
+            linkElement.rel = 'noopener noreferrer';
+            linkElement.className = 'about-link';
+            aboutLinks.appendChild(linkElement);
+        });
+    }
+
+    // 显示弹窗
+    aboutModal.classList.add('show');
+}
+
+/**
+ * 隐藏关于弹窗
+ */
+function hideAboutModal() {
+    aboutModal.classList.remove('show');
 }
 
 /**
@@ -291,6 +356,34 @@ apiKeyInput.addEventListener('keypress', (e) => {
  * 错误提示关闭按钮事件监听器
  */
 errorClose.addEventListener('click', hideErrorToast);
+
+/**
+ * 关于按钮事件监听器
+ */
+aboutBtn.addEventListener('click', showAboutModal);
+
+/**
+ * 关于弹窗关闭按钮事件监听器
+ */
+aboutModalClose.addEventListener('click', hideAboutModal);
+
+/**
+ * 点击弹窗背景关闭弹窗
+ */
+aboutModal.addEventListener('click', (e) => {
+    if (e.target === aboutModal) {
+        hideAboutModal();
+    }
+});
+
+/**
+ * ESC键关闭弹窗
+ */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && aboutModal.classList.contains('show')) {
+        hideAboutModal();
+    }
+});
 
 /**
  * ====================== 打字机效果 ======================
