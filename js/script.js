@@ -177,6 +177,15 @@ copyBtn.addEventListener('click', () => {
 });
 
 /**
+ * 模型选择事件监听器
+ * 用户选择不同模型时保存到localStorage
+ */
+modelSelect.addEventListener('change', () => {
+    // 保存用户选择的模型到localStorage
+    localStorage.setItem('preferredModel', modelSelect.value);
+});
+
+/**
  * ====================== 打字机效果 ======================
  */
 
@@ -555,9 +564,16 @@ function initModelSelector() {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
-        // 默认选择第一个模型
-        if (config.model.length > 0) {
-            modelSelect.value = config.model[0];
+        
+        // 从localStorage加载用户保存的模型偏好
+        const savedModel = localStorage.getItem('preferredModel');
+        if (savedModel && config.model.includes(savedModel)) {
+            modelSelect.value = savedModel;
+        } else {
+            // 默认选择第一个模型
+            if (config.model.length > 0) {
+                modelSelect.value = config.model[0];
+            }
         }
     }
 }
