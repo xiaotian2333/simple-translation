@@ -20,6 +20,11 @@ const modelSelect = document.getElementById('modelSelect');    // 模型选择�
 const tokenStatus = document.getElementById('tokenStatus');    // Token状态显示
 const tokenCount = document.getElementById('tokenCount');      // Token计数显示
 
+// 错误提示相关元素
+const errorToast = document.getElementById('errorToast');      // 错误提示容器
+const errorMessage = document.getElementById('errorMessage');  // 错误提示消息
+const errorClose = document.getElementById('errorClose');      // 错误提示关闭按钮
+
 // 设置面板相关元素
 const settingsHeader = document.getElementById('settingsHeader');    // 设置面板头部
 const settingsContent = document.getElementById('settingsContent');  // 设置面板内容
@@ -47,6 +52,31 @@ function escapeHtml(text) {
         "'": '&#039;'    // 单引号
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * 显示错误提示
+ * @param {string} message - 错误消息
+ * @param {number} duration - 显示持续时间（毫秒），默认5000ms
+ */
+function showErrorToast(message, duration = 5000) {
+    // 设置错误消息
+    errorMessage.textContent = message;
+    
+    // 显示错误提示
+    errorToast.classList.add('show');
+    
+    // 设置自动隐藏定时器
+    setTimeout(() => {
+        hideErrorToast();
+    }, duration);
+}
+
+/**
+ * 隐藏错误提示
+ */
+function hideErrorToast() {
+    errorToast.classList.remove('show');
 }
 
 /**
@@ -258,6 +288,11 @@ apiKeyInput.addEventListener('keypress', (e) => {
 });
 
 /**
+ * 错误提示关闭按钮事件监听器
+ */
+errorClose.addEventListener('click', hideErrorToast);
+
+/**
  * ====================== 打字机效果 ======================
  */
 
@@ -339,7 +374,7 @@ function triggerAutoTranslate() {
             if (error.message !== '翻译被取消') {
                 console.error('翻译失败:', error);
                 tokenCount.style.display = 'none';
-                // resultArea.textContent = `翻译失败: ${error.message}`; // 错误提示已有另外的代码处理
+                showErrorToast(`翻译失败: ${error.message}`);
             }
         } finally {
             loading.classList.remove('show');
@@ -423,7 +458,9 @@ async function translateWithGLM(text, from, to) {
     // 检查HTTP响应状态
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+        showErrorToast(`翻译API错误: ${errorMsg}`);
+        throw new Error(errorMsg);
     }
 
     // 设置流式读取器
@@ -503,7 +540,13 @@ async function translateWithGLM(text, from, to) {
                 }
 
                 processStream(); // 递归处理下一个数据块
-            }).catch(reject);
+            }).catch((error) => {
+                // 如果是网络错误或取消错误，显示错误提示
+                if (error.name !== 'AbortError') {
+                    showErrorToast('网络连接失败，请检查网络连接');
+                }
+                reject(error);
+            });
         }
 
         /**
@@ -575,6 +618,7 @@ async function getApiToken() {
         console.error('获取Token失败:', error);
         tokenFetchFailed = true; // 标记为获取失败
         updateTokenStatus();
+        showErrorToast('获取Token失败，请检查服务器配置');
         throw error;
     }
 }
@@ -700,11 +744,11 @@ async function loadConfig() {
         console.error('加载配置文件失败:', error);
         // 根据错误类型显示不同的用户提示
         if (error.message.includes('Failed to fetch')) {
-            resultArea.textContent = '网络连接失败，请检查网络连接或服务器状态';
+            showErrorToast('网络连接失败，请检查网络连接或服务器状态');
         } else if (error.message.includes('Token')) {
-            resultArea.textContent = '获取Token失败，请检查Token API配置是否正确';
+            showErrorToast('获取Token失败，请检查Token API配置是否正确');
         } else {
-            resultArea.textContent = '加载配置文件失败，请检查config.json是否存在且格式正确';
+            showErrorToast('加载配置文件失败，请检查config.json是否存在且格式正确');
         }
     }
 }
