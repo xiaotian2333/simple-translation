@@ -192,14 +192,96 @@ body {
     /* 元素间距 */
 }
 
-/* 模型选择器容器 - 包含模型选择下拉框和token状态 */
+/* 设置面板容器 - 包含可折叠的设置选项 */
+.settings-panel {
+    margin-bottom: 20px;
+    /* 底部外边距 */
+    border: 1px solid var(--border-color);
+    /* 边框样式 */
+    border-radius: 8px;
+    /* 圆角边框 */
+    background: var(--container-bg);
+    /* 容器背景色 */
+}
+
+/* 设置面板头部 - 包含标题、token状态和折叠按钮 */
+.settings-header {
+    display: flex;
+    /* 弹性布局 */
+    justify-content: space-between;
+    /* 两端对齐 */
+    align-items: center;
+    /* 垂直居中 */
+    padding: 12px 16px;
+    /* 内边距 */
+    cursor: pointer;
+    /* 鼠标指针样式 */
+    user-select: none;
+    /* 禁止文本选择 */
+    border-radius: 8px;
+    /* 圆角边框 */
+    transition: background-color 0.2s ease;
+    /* 背景色过渡效果 */
+}
+
+/* 设置面板头部悬停效果 */
+.settings-header:hover {
+    background: var(--status-bg);
+    /* 悬停时的背景色 */
+}
+
+/* 设置标题样式 */
+.settings-title {
+    font-size: 14px;
+    /* 标题字体大小 */
+    font-weight: 500;
+    /* 字体粗细 */
+    color: var(--secondary-text);
+    /* 次要文本颜色 */
+}
+
+/* 设置折叠按钮样式 */
+.settings-toggle {
+    font-size: 12px;
+    /* 折叠按钮字体大小 */
+    color: var(--tertiary-text);
+    /* 第三级文本颜色 */
+    transition: transform 0.3s ease;
+    /* 旋转过渡效果 */
+}
+
+/* 设置面板内容区域 */
+.settings-content {
+    padding: 0 16px;
+    /* 左右内边距 */
+    max-height: 0;
+    /* 默认最大高度为0（折叠状态） */
+    overflow: hidden;
+    /* 隐藏溢出内容 */
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    /* 高度和内边距过渡效果 */
+}
+
+/* 设置面板展开状态 */
+.settings-content.expanded {
+    max-height: 100px;
+    /* 展开时的最大高度 */
+    padding: 16px;
+    /* 展开时的内边距 */
+}
+
+/* 设置面板展开时折叠按钮旋转 */
+.settings-content.expanded + .settings-toggle {
+    transform: rotate(180deg);
+    /* 旋转180度 */
+}
+
+/* 模型选择器容器 - 包含模型选择下拉框 */
 .model-selector {
     display: flex;
     /* 弹性布局 */
     align-items: center;
     /* 垂直居中 */
-    margin-bottom: 20px;
-    /* 底部外边距 */
     gap: 10px;
     /* 元素间距 */
     flex-wrap: wrap;

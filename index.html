@@ -40,13 +40,20 @@
                     </select>
                 </div>
 
-                <div class="model-selector">
-                    <span class="model-label">模型：</span>
-                    <select class="model-select" id="modelSelect">
-                        <!-- 模型选项将通过JavaScript动态加载 -->
-                    </select>
-                    <span class="token-status" id="tokenStatus">Token:
-                        未获取</span>
+                <div class="settings-panel">
+                    <div class="settings-header" id="settingsHeader">
+                        <span class="settings-title">⚙️ 设置</span>
+                        <span class="token-status" id="tokenStatus">Token: 未获取</span>
+                        <span class="settings-toggle" id="settingsToggle">▼</span>
+                    </div>
+                    <div class="settings-content" id="settingsContent">
+                        <div class="model-selector">
+                            <span class="model-label">模型：</span>
+                            <select class="model-select" id="modelSelect">
+                                <!-- 模型选项将通过JavaScript动态加载 -->
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="translate-content">

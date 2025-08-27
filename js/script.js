@@ -20,6 +20,11 @@ const modelSelect = document.getElementById('modelSelect');    // 模型选择�
 const tokenStatus = document.getElementById('tokenStatus');    // Token状态显示
 const tokenCount = document.getElementById('tokenCount');      // Token计数显示
 
+// 设置面板相关元素
+const settingsHeader = document.getElementById('settingsHeader');    // 设置面板头部
+const settingsContent = document.getElementById('settingsContent');  // 设置面板内容
+const settingsToggle = document.getElementById('settingsToggle');      // 设置折叠按钮
+
 /**
  * ====================== 工具函数 ======================
  */
@@ -174,6 +179,22 @@ copyBtn.addEventListener('click', () => {
             copyBtn.textContent = originalText;
         }, 2000);
     });
+});
+
+/**
+ * 设置面板折叠功能
+ * 点击设置面板头部时切换展开/折叠状态
+ */
+settingsHeader.addEventListener('click', () => {
+    // 切换展开状态
+    settingsContent.classList.toggle('expanded');
+    
+    // 更新折叠按钮图标
+    if (settingsContent.classList.contains('expanded')) {
+        settingsToggle.textContent = '▲';
+    } else {
+        settingsToggle.textContent = '▼';
+    }
 });
 
 /**
