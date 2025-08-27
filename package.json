@@ -1,6 +1,6 @@
 {
   "name": "immersive-translation",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "简单翻译服务器，提供JWT token生成和静态文件服务",
   "main": "server.js",
   "scripts": {
