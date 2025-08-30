@@ -9,6 +9,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 开发命令
 
+### 安装依赖
+```bash
+npm install
+# 或
+pnpm install
+```
+
 ### 启动开发服务器
 ```bash
 pnpm start
@@ -27,6 +34,11 @@ pnpm build
 docker build -t simple-translation .
 docker run -p 7860:7860 -e API_KEY=your_api_key_here simple-translation
 ```
+
+### 构建过程说明
+构建命令会执行两个步骤：
+1. 使用uglify-js压缩JavaScript代码
+2. 执行build.js将CSS和JS内联到HTML文件中，生成output.html
 
 ## 架构说明
 
@@ -89,3 +101,6 @@ docker run -p 7860:7860 -e API_KEY=your_api_key_here simple-translation
 9. **输入监控**: 定时检查输入框状态，清空时自动清除输出结果
 10. **API配置**: 支持多种GLM模型，可通过config.json配置API端点和模型列表
 11. **安全考虑**: JWT token包含设备ID和时间戳，支持过期时间控制
+12. **用户输入限制**: 输出框已实现输入防护，阻止用户直接编辑、粘贴、拖拽和回车键操作
+13. **模型选择**: 用户可以在前端选择不同的GLM模型，偏好会保存在localStorage中
+14. **即时翻译触发**: 当用户修改模型、切换输入输出语言时，如果已有文本输入会立即触发翻译

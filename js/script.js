@@ -330,11 +330,37 @@ function loadApiKey() {
 
 /**
  * 模型选择事件监听器
- * 用户选择不同模型时保存到localStorage
+ * 用户选择不同模型时保存到localStorage并触发翻译
  */
 modelSelect.addEventListener('change', () => {
     // 保存用户选择的模型到localStorage
     localStorage.setItem('preferredModel', modelSelect.value);
+    // 如果已输入文本，立即触发翻译
+    if (sourceText.value.trim()) {
+        triggerAutoTranslate();
+    }
+});
+
+/**
+ * 源语言选择事件监听器
+ * 用户选择不同源语言时触发翻译
+ */
+sourceLang.addEventListener('change', () => {
+    // 如果已输入文本，立即触发翻译
+    if (sourceText.value.trim()) {
+        triggerAutoTranslate();
+    }
+});
+
+/**
+ * 目标语言选择事件监听器
+ * 用户选择不同目标语言时触发翻译
+ */
+targetLang.addEventListener('change', () => {
+    // 如果已输入文本，立即触发翻译
+    if (sourceText.value.trim()) {
+        triggerAutoTranslate();
+    }
 });
 
 /**
