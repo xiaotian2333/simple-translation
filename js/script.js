@@ -985,7 +985,7 @@ window.addEventListener('load', () => {
 function preventResultAreaInput() {
     // 保存原始内容，当内容被修改时恢复
     let originalContent = '';
-    
+
     // 监听内容变化，如果有修改就恢复
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -997,21 +997,21 @@ function preventResultAreaInput() {
             }
         });
     });
-    
+
     // 开始观察DOM变化
     observer.observe(resultArea, {
         characterData: true,
         childList: true,
         subtree: true
     });
-    
+
     // 更新原始内容的函数
-    window.updateOriginalContent = function(content) {
+    window.updateOriginalContent = function (content) {
         originalContent = content;
     };
-    
+
     // 设置翻译结果内容的函数
-    window.setTranslationResult = function(content, isHtml = false) {
+    window.setTranslationResult = function (content, isHtml = false) {
         if (isHtml) {
             resultArea.innerHTML = content;
         } else {
@@ -1022,25 +1022,25 @@ function preventResultAreaInput() {
         // 更新原始内容（使用纯文本格式）
         originalContent = content;
     };
-    
+
     // 阻止输入法事件（移动端键盘弹出）
     resultArea.addEventListener('compositionstart', (e) => {
         e.preventDefault();
         return false;
     });
-    
+
     // 阻止粘贴事件
     resultArea.addEventListener('paste', (e) => {
         e.preventDefault();
         return false;
     });
-    
+
     // 阻止拖拽事件
     resultArea.addEventListener('drop', (e) => {
         e.preventDefault();
         return false;
     });
-    
+
     // 阻止回车键事件
     resultArea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -1048,7 +1048,7 @@ function preventResultAreaInput() {
             return false;
         }
     });
-    
+
     // 添加一个样式来阻止移动端键盘弹出
     resultArea.setAttribute('readonly', 'true');
     resultArea.style.imeMode = 'disabled';
