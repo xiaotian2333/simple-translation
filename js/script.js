@@ -247,9 +247,8 @@ swapBtn.addEventListener('click', () => {
     // 从结果区域获取纯文本内容，将<br>标签转换回换行符
     const resultText = resultArea.innerText.replace(/<br>/g, '\n');
     sourceText.value = resultText;
-    // 将源文本HTML转义后设置到结果区域，并将换行符转换为<br>标签
-    const escapedText = escapeHtml(tempText);
-    resultArea.innerHTML = escapedText.replace(/\n/g, '<br>');
+    // 将源文本设置到结果区域
+    setTranslationResult(tempText);
 
     // 更新字符计数显示
     charCount.textContent = `${sourceText.value.length} 字符`;
@@ -436,7 +435,7 @@ function triggerAutoTranslate() {
             currentAbortController.abort();
             currentAbortController = null;
         }
-        resultArea.innerHTML = '';
+        setTranslationResult('');
         tokenCount.style.display = 'none';
         adjustResultAreaHeight();
         return;
@@ -455,7 +454,7 @@ function triggerAutoTranslate() {
     translateTimeout = setTimeout(async () => {
         // 显示加载状态
         loading.classList.add('show');
-        resultArea.textContent = '准备翻译...';
+        setTranslationResult('准备翻译...');
         tokenCount.style.display = 'none';
 
         try {
@@ -616,7 +615,7 @@ async function translateWithGLM(text, from, to) {
                                 thinkingContent += delta.thinking_content;
                                 // 实时显示思考过程
                                 if (config.thinkPrint) {
-                                    resultArea.innerHTML = `<div style="color: #666; font-style: italic;">思考中...\n${thinkingContent}</div>`;
+                                    setTranslationResult(`思考中...\n${thinkingContent}`, true);
                                     resultArea.scrollTop = resultArea.scrollHeight;
                                 }
                             } else if (delta.content) {
@@ -652,11 +651,10 @@ async function translateWithGLM(text, from, to) {
                 const escapedThinkingContent = escapeHtml(thinkingContent);
                 const escapedFullContent = escapeHtml(fullContent);
                 const htmlContent = `<div style="color: #666; font-style: italic; white-space: pre-wrap;">思考过程：\n${escapedThinkingContent}</div><hr style="margin: 10px 0;"><div style="white-space: pre-wrap;">${escapedFullContent}</div>`;
-                resultArea.innerHTML = htmlContent;
+                setTranslationResult(htmlContent, true);
             } else {
-                // 只显示翻译结果，先转义HTML，然后将换行符转换为<br>标签
-                const escapedContent = escapeHtml(fullContent);
-                resultArea.innerHTML = escapedContent.replace(/\n/g, '<br>');
+                // 只显示翻译结果
+                setTranslationResult(fullContent);
             }
 
             // 延迟调整高度和滚动位置，确保DOM更新完成
@@ -915,7 +913,7 @@ function startInputCheckInterval() {
             }
             // 清除翻译定时器
             clearTimeout(translateTimeout);
-            resultArea.innerHTML = '';
+            setTranslationResult('');
             tokenCount.style.display = 'none';
             adjustResultAreaHeight();
         }
@@ -948,6 +946,84 @@ window.addEventListener('load', () => {
     adjustTextareaHeight(sourceText);
     adjustResultAreaHeight();
 
+    // 阻止翻译结果区域的用户输入，但允许选择文本
+    preventResultAreaInput();
+
     // 启动输入框状态定时检查
     startInputCheckInterval();
 });
+
+/**
+ * 阻止翻译结果区域的用户输入，但允许选择文本和复制
+ */
+function preventResultAreaInput() {
+    // 保存原始内容，当内容被修改时恢复
+    let originalContent = '';
+    
+    // 监听内容变化，如果有修改就恢复
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                // 如果内容被修改，恢复原始内容
+                if (resultArea.textContent !== originalContent) {
+                    resultArea.textContent = originalContent;
+                }
+            }
+        });
+    });
+    
+    // 开始观察DOM变化
+    observer.observe(resultArea, {
+        characterData: true,
+        childList: true,
+        subtree: true
+    });
+    
+    // 更新原始内容的函数
+    window.updateOriginalContent = function(content) {
+        originalContent = content;
+    };
+    
+    // 设置翻译结果内容的函数
+    window.setTranslationResult = function(content, isHtml = false) {
+        if (isHtml) {
+            resultArea.innerHTML = content;
+        } else {
+            // 先转义HTML，然后将换行符转换为<br>标签
+            const escapedContent = escapeHtml(content);
+            resultArea.innerHTML = escapedContent.replace(/\n/g, '<br>');
+        }
+        // 更新原始内容（使用纯文本格式）
+        originalContent = content;
+    };
+    
+    // 阻止输入法事件（移动端键盘弹出）
+    resultArea.addEventListener('compositionstart', (e) => {
+        e.preventDefault();
+        return false;
+    });
+    
+    // 阻止粘贴事件
+    resultArea.addEventListener('paste', (e) => {
+        e.preventDefault();
+        return false;
+    });
+    
+    // 阻止拖拽事件
+    resultArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        return false;
+    });
+    
+    // 阻止回车键事件
+    resultArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // 添加一个样式来阻止移动端键盘弹出
+    resultArea.setAttribute('readonly', 'true');
+    resultArea.style.imeMode = 'disabled';
+}

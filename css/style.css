@@ -613,6 +613,15 @@ body {
     /* 保留换行和空格 */
     word-wrap: break-word;
     /* 长单词换行 */
+    /* 阻止用户输入但允许选择文本 */
+    user-select: text;
+    /* 允许文本选择 */
+    -webkit-user-select: text;
+    /* 允许文本选择（WebKit浏览器） */
+    -moz-user-select: text;
+    /* 允许文本选择（Firefox） */
+    -ms-user-select: text;
+    /* 允许文本选择（IE/Edge） */
 }
 
 /* ====================== 特殊效果和按钮样式 ====================== */
