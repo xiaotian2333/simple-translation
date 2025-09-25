@@ -145,17 +145,6 @@ function hideAboutModal() {
 }
 
 /**
- * ====================== 全局状态变量 ======================
- */
-
-// 配置相关变量
-let config = {};                           // 应用配置对象，从config.json加载
-let currentToken = '';                     // 当前有效的JWT token
-let tokenExpireTime = 0;                   // token过期时间戳
-let tokenFetchFailed = false;              // token获取失败标记
-let tokenIsFetching = false;              // token正在获取标记
-
-/**
  * ====================== 常量定义 ======================
  */
 
@@ -173,6 +162,31 @@ const languageNames = {
     'es': '西班牙语',    // Spanish
     'ru': '俄语'         // Russian
 };
+
+/** 
+ * Token状态枚举 
+ * 用于管理JWT token的状态
+ */
+const TOKEN_STATUS = {
+    CONFIGURED: 'configured', // 已配置API密钥
+    FETCHING: 'fetching', // 正在获取token
+    FETCH_FAILED: 'fetch_failed', // 获取token失败
+    UNFETCHED: 'unfetched', // token未获取
+    VALID: 'valid', // token有效
+    EXPIRED: 'expired' // token已过期
+};
+
+/**
+ * ====================== 全局状态变量 ======================
+ */
+
+// 配置相关变量
+let config = {};                           // 应用配置对象，从config.json加载
+let currentToken = '';                     // 当前有效的JWT token
+let tokenExpireTime = 0;                   // token过期时间戳
+
+// 当前token状态
+let currentTokenStatus = TOKEN_STATUS.UNFETCHED;
 
 /**
  * ====================== 主题管理功能 ======================
@@ -310,7 +324,7 @@ function saveApiKey() {
     apiKeySave.textContent = '已保存';
 
     // 立即更新token状态显示
-    updateTokenStatus();
+    updateTokenStatus(hasApiKeyConfigured() || TOKEN_STATUS.CONFIGURED);
 
     // 2秒后恢复按钮状态
     setTimeout(() => {
@@ -720,8 +734,7 @@ function updateTokenDisplay(tokens) {
 async function getApiToken() {
     try {
         // 设置正在获取状态
-        tokenIsFetching = true;
-        updateTokenStatus();
+        updateTokenStatus(TOKEN_STATUS.FETCHING);
 
         const response = await fetch(config.token_api);
         const data = await response.json();
@@ -730,18 +743,14 @@ async function getApiToken() {
             // 保存token和过期时间
             currentToken = data.apiToken;
             tokenExpireTime = data.expireTime * 1000; // 直接使用后端返回的时间戳（转换为毫秒）
-            tokenFetchFailed = false; // 重置失败状态
-            tokenIsFetching = false; // 重置获取中状态
-            updateTokenStatus();
+            updateTokenStatus(TOKEN_STATUS.VALID);
             return currentToken;
         } else {
             throw new Error('Token API返回格式错误');
         }
     } catch (error) {
         console.error('获取Token失败:', error);
-        tokenFetchFailed = true; // 标记为获取失败
-        tokenIsFetching = false; // 重置获取中状态
-        updateTokenStatus();
+        updateTokenStatus(TOKEN_STATUS.FETCH_FAILED);
         showErrorToast('获取Token失败，请检查服务器配置');
         throw error;
     }
@@ -766,36 +775,57 @@ function hasApiKeyConfigured() {
 
 /**
  * 更新Token状态显示
- * 根据token的不同状态显示不同的文本和样式
+ * @param {string} status - token状态，使用TOKEN_STATUS枚举
+ * @param {Object} options - 可选参数
+ * @param {number} options.remainingTime - 剩余时间（秒），仅VALID状态需要
  */
-function updateTokenStatus() {
-    if (hasApiKeyConfigured()) {
-        // 已配置API密钥状态
-        tokenStatus.textContent = 'Token: 已配置key';
-        tokenStatus.className = 'token-status configured';
-    } else if (tokenIsFetching) {
-        // Token正在获取状态
-        tokenStatus.textContent = 'Token: 获取中';
-        tokenStatus.className = 'token-status fetching';
-    } else if (tokenFetchFailed) {
-        // Token获取失败状态
-        tokenStatus.textContent = 'Token: 获取失败';
-        tokenStatus.className = 'token-status expired'; // 使用与过期一致的红色
-    } else if (!currentToken) {
-        // Token未获取状态
-        tokenStatus.textContent = 'Token: 未获取';
-        tokenStatus.className = 'token-status';
-    } else if (isTokenValid()) {
-        // Token有效状态，显示剩余时间
-        const remainingTime = Math.floor((tokenExpireTime - Date.now()) / 1000);
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        tokenStatus.textContent = `Token: 有效 (${minutes}:${seconds.toString().padStart(2, '0')})`;
-        tokenStatus.className = 'token-status valid';
-    } else {
-        // Token过期状态
-        tokenStatus.textContent = 'Token: 已过期';
-        tokenStatus.className = 'token-status expired';
+function updateTokenStatus(status, options = {}) {
+    // 更新全局状态
+    currentTokenStatus = status;
+
+    const { remainingTime } = options;
+
+    switch (status) {
+        case TOKEN_STATUS.CONFIGURED:
+            // 已配置API密钥状态
+            tokenStatus.textContent = 'Token: 已配置key';
+            tokenStatus.className = 'token-status configured';
+            break;
+        case TOKEN_STATUS.FETCHING:
+            // Token正在获取状态
+            tokenStatus.textContent = 'Token: 获取中';
+            tokenStatus.className = 'token-status fetching';
+            break;
+        case TOKEN_STATUS.FETCH_FAILED:
+            // Token获取失败状态
+            tokenStatus.textContent = 'Token: 获取失败';
+            tokenStatus.className = 'token-status expired';
+            break;
+        case TOKEN_STATUS.UNFETCHED:
+            // Token未获取状态
+            tokenStatus.textContent = 'Token: 未获取';
+            tokenStatus.className = 'token-status';
+            break;
+        case TOKEN_STATUS.VALID:
+            // Token有效状态，显示剩余时间
+            if (remainingTime !== undefined) {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                tokenStatus.textContent = `Token: 有效 (${minutes}:${seconds.toString().padStart(2, '0')})`;
+            } else {
+                tokenStatus.textContent = 'Token: 有效';
+            }
+            tokenStatus.className = 'token-status valid';
+            break;
+        case TOKEN_STATUS.EXPIRED:
+            // Token过期状态
+            tokenStatus.textContent = 'Token: 已过期';
+            tokenStatus.className = 'token-status expired';
+            break;
+        default:
+            // 默认状态
+            tokenStatus.textContent = 'Token: 未知状态';
+            tokenStatus.className = 'token-status';
     }
 }
 
@@ -811,7 +841,7 @@ async function getValidToken() {
         return '';
     }
 
-    if (!isTokenValid() || tokenFetchFailed) {
+    if (!isTokenValid() || currentTokenStatus === TOKEN_STATUS.FETCH_FAILED) {
         await getApiToken();
     }
     return currentToken;
@@ -866,7 +896,22 @@ async function loadConfig() {
         }
 
         // 定时更新Token状态显示（每秒更新一次）
-        setInterval(updateTokenStatus, 1000);
+        setInterval(() => {
+            if (hasApiKeyConfigured()) {
+                updateTokenStatus(TOKEN_STATUS.CONFIGURED);
+            } else if (isTokenValid()) {
+                const remainingTime = Math.floor((tokenExpireTime - Date.now()) / 1000);
+                updateTokenStatus(TOKEN_STATUS.VALID, { remainingTime });
+            } else if (currentTokenStatus === TOKEN_STATUS.FETCH_FAILED) {
+                // updateTokenStatus(TOKEN_STATUS.FETCH_FAILED); // 获取失败，此状态无需触发更新
+            } else if (currentTokenStatus === TOKEN_STATUS.FETCHING) {
+                // updateTokenStatus(TOKEN_STATUS.FETCHING); // 获取中，此状态无需触发更新
+            } else if (!currentToken) {
+                updateTokenStatus(TOKEN_STATUS.UNFETCHED);
+            } else {
+                updateTokenStatus(TOKEN_STATUS.EXPIRED);
+            }
+        }, 1000);
 
     } catch (error) {
         console.error('加载配置文件失败:', error);
