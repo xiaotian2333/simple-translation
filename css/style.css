@@ -601,6 +601,16 @@ body {
     /* 错误背景色 */
 }
 
+/* Token获取中状态样式 */
+.token-status.fetching {
+    color: #f5a623;
+
+    /* 获取中文本颜色（黄色） */
+    background: var(--status-bg);
+
+    /* 状态背景色 */
+}
+
 /* Token已配置key状态样式 */
 .token-status.configured {
     color: var(--primary-color);

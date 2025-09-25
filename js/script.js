@@ -153,6 +153,7 @@ let config = {};                           // 应用配置对象，从config.jso
 let currentToken = '';                     // 当前有效的JWT token
 let tokenExpireTime = 0;                   // token过期时间戳
 let tokenFetchFailed = false;              // token获取失败标记
+let tokenIsFetching = false;              // token正在获取标记
 
 /**
  * ====================== 常量定义 ======================
@@ -718,6 +719,10 @@ function updateTokenDisplay(tokens) {
  */
 async function getApiToken() {
     try {
+        // 设置正在获取状态
+        tokenIsFetching = true;
+        updateTokenStatus();
+
         const response = await fetch(config.token_api);
         const data = await response.json();
 
@@ -726,6 +731,7 @@ async function getApiToken() {
             currentToken = data.apiToken;
             tokenExpireTime = data.expireTime * 1000; // 直接使用后端返回的时间戳（转换为毫秒）
             tokenFetchFailed = false; // 重置失败状态
+            tokenIsFetching = false; // 重置获取中状态
             updateTokenStatus();
             return currentToken;
         } else {
@@ -734,6 +740,7 @@ async function getApiToken() {
     } catch (error) {
         console.error('获取Token失败:', error);
         tokenFetchFailed = true; // 标记为获取失败
+        tokenIsFetching = false; // 重置获取中状态
         updateTokenStatus();
         showErrorToast('获取Token失败，请检查服务器配置');
         throw error;
@@ -766,6 +773,10 @@ function updateTokenStatus() {
         // 已配置API密钥状态
         tokenStatus.textContent = 'Token: 已配置key';
         tokenStatus.className = 'token-status configured';
+    } else if (tokenIsFetching) {
+        // Token正在获取状态
+        tokenStatus.textContent = 'Token: 获取中';
+        tokenStatus.className = 'token-status fetching';
     } else if (tokenFetchFailed) {
         // Token获取失败状态
         tokenStatus.textContent = 'Token: 获取失败';
