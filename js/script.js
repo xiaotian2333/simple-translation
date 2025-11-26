@@ -568,6 +568,7 @@ async function translateWithGLM(text, from, to) {
         temperature: 0.1,                            // 温度参数，控制随机性
         max_tokens: 2000,                           // 最大token数
         top_p: 0.1,                                 // 采样参数
+        max_tokens: config.max_tokens[modelSelect.value] || 65536, // 最大token数
         stream: true,                               // 启用流式传输
         thinking: {                                   // GLM-4.5思考模式
             type: config.thinking                   // 控制模型是否思考
