@@ -2,6 +2,7 @@
     "api_url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
     "model": [
         "glm-4.7-flash",
+        "glm-5",
         "glm-4.7",
         "glm-4.6",
         "glm-4.5",
@@ -14,6 +15,7 @@
     ],
     "max_tokens": {
         "glm-4.7-flash": 131072,
+        "glm-5": 131072,
         "glm-4.7": 131072,
         "glm-4.6": 131072,
         "glm-4.5": 98304,
