@@ -364,7 +364,15 @@ function saveApiUrl() {
     const inputUrl = apiUrlInput.value.trim();
     if (!inputUrl) {
         localStorage.removeItem('apiUrl');
-        apiUrlInput.value = configApiUrl;
+        apiUrlInput.value = '';
+
+        apiUrlSave.classList.add('success');
+        apiUrlSave.textContent = '已保存';
+        setTimeout(() => {
+            apiUrlSave.classList.remove('success');
+            apiUrlSave.textContent = '保存';
+        }, 2000);
+
         fetchModels();
         return;
     }
@@ -396,11 +404,12 @@ function loadApiKey() {
  */
 function loadApiUrl() {
     const savedApiUrl = localStorage.getItem('apiUrl');
+    apiUrlInput.placeholder = `${configApiUrl || 'https://api.openai.com/v1'}（需以/v1结尾）`;
     if (savedApiUrl) {
         apiUrlInput.value = savedApiUrl;
         return;
     }
-    apiUrlInput.value = configApiUrl;
+    apiUrlInput.value = '';
 }
 
 /**
