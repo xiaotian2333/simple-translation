@@ -1,14 +1,13 @@
 {
   "name": "immersive-translation",
   "version": "1.0.5",
-  "description": "简单翻译服务器，提供JWT token生成和静态文件服务",
+  "description": "简单翻译服务器，提供静态文件服务",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "build": "uglifyjs js/script.js -m -o js/script.min.js && node build.js"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
     "winston": "^3.11.0"
   },
   "engines": {
@@ -16,14 +15,9 @@
   },
   "keywords": [
     "translation",
-    "jwt",
-    "token",
     "simple",
     "build"
   ],
-  "env": {
-    "API_KEY": "您的API密钥，格式为 id.secret"
-  },
   "devDependencies": {
     "uglify-js": "^3.19.3"
   }

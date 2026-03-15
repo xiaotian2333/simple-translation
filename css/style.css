@@ -371,7 +371,7 @@ body {
 
 /* 设置面板展开状态 */
 .settings-content.expanded {
-    max-height: 200px;
+    max-height: 260px;
 
     /* 展开时的最大高度 */
     padding: 16px;
@@ -413,6 +413,11 @@ body {
     flex-wrap: wrap;
 
     /* 允许换行 */
+}
+
+/* API URL容器，增加与密钥配置的间距 */
+.api-url-container {
+    margin-bottom: 20px;
 }
 
 /* API Key标签样式 */

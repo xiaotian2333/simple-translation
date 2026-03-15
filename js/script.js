@@ -17,7 +17,7 @@ const copyBtn = document.getElementById('copySourceBtn');      // 复制按钮
 // 状态显示相关元素
 const charCount = document.getElementById('charCount');        // 字符计数显示
 const modelSelect = document.getElementById('modelSelect');    // 模型选择下拉框
-const tokenStatus = document.getElementById('tokenStatus');    // Token状态显示
+const tokenStatus = document.getElementById('tokenStatus');    // Key状态显示
 const tokenCount = document.getElementById('tokenCount');      // Token计数显示
 
 // 错误提示相关元素
@@ -33,6 +33,8 @@ const settingsToggle = document.getElementById('settingsToggle');      // 设置
 // API Key相关元素
 const apiKeyInput = document.getElementById('apiKeyInput');          // API Key输入框
 const apiKeySave = document.getElementById('apiKeySave');              // API Key保存按钮
+const apiUrlInput = document.getElementById('apiUrlInput');            // API URL输入框
+const apiUrlSave = document.getElementById('apiUrlSave');              // API URL保存按钮
 
 // 关于弹窗相关元素
 const aboutBtn = document.getElementById('aboutBtn');                  // 关于按钮
@@ -165,15 +167,15 @@ const languageNames = {
 
 /** 
  * Token状态枚举 
- * 用于管理JWT token的状态
+ * 用于管理API Key的状态
  */
 const TOKEN_STATUS = {
     CONFIGURED: 'configured', // 已配置API密钥
-    FETCHING: 'fetching', // 正在获取token
-    FETCH_FAILED: 'fetch_failed', // 获取token失败
-    UNFETCHED: 'unfetched', // token未获取
-    VALID: 'valid', // token有效
-    EXPIRED: 'expired' // token已过期
+    FETCHING: 'fetching', // 正在获取
+    FETCH_FAILED: 'fetch_failed', // 获取失败
+    UNFETCHED: 'unfetched', // 未获取
+    VALID: 'valid', // 已获取
+    EXPIRED: 'expired' // 预留状态
 };
 
 /**
@@ -182,8 +184,9 @@ const TOKEN_STATUS = {
 
 // 配置相关变量
 let config = {};                           // 应用配置对象，从config.json加载
-let currentToken = '';                     // 当前有效的JWT token
-let tokenExpireTime = 0;                   // token过期时间戳
+let configApiKey = '';                     // 配置文件中的默认API Key
+let availableModels = [];                  // 可用模型列表
+let configApiUrl = '';                     // 配置文件中的默认API URL
 
 // 当前token状态
 let currentTokenStatus = TOKEN_STATUS.UNFETCHED;
@@ -317,20 +320,51 @@ function saveApiKey() {
     const apiKey = apiKeyInput.value.trim();
 
     // 保存到localStorage（不验证格式）
-    localStorage.setItem('apiKey', apiKey);
+    if (apiKey) {
+        localStorage.setItem('apiKey', apiKey);
+    } else {
+        localStorage.removeItem('apiKey');
+    }
 
     // 显示保存成功状态
     apiKeySave.classList.add('success');
     apiKeySave.textContent = '已保存';
 
     // 立即更新token状态显示
-    updateTokenStatus(hasApiKeyConfigured() || TOKEN_STATUS.CONFIGURED);
+    updateTokenStatus(getConfiguredTokenStatus());
+
+    // 重新拉取模型列表
+    fetchModels();
 
     // 2秒后恢复按钮状态
     setTimeout(() => {
         apiKeySave.classList.remove('success');
         apiKeySave.textContent = '保存';
     }, 2000);
+}
+
+/**
+ * 保存API URL到localStorage
+ */
+function saveApiUrl() {
+    const inputUrl = apiUrlInput.value.trim();
+    if (!inputUrl) {
+        localStorage.removeItem('apiUrl');
+        apiUrlInput.value = configApiUrl;
+        fetchModels();
+        return;
+    }
+    localStorage.setItem('apiUrl', inputUrl);
+    apiUrlInput.value = inputUrl;
+
+    apiUrlSave.classList.add('success');
+    apiUrlSave.textContent = '已保存';
+    setTimeout(() => {
+        apiUrlSave.classList.remove('success');
+        apiUrlSave.textContent = '保存';
+    }, 2000);
+
+    fetchModels();
 }
 
 /**
@@ -341,6 +375,18 @@ function loadApiKey() {
     if (savedApiKey) {
         apiKeyInput.value = savedApiKey;
     }
+}
+
+/**
+ * 从localStorage加载API URL
+ */
+function loadApiUrl() {
+    const savedApiUrl = localStorage.getItem('apiUrl');
+    if (savedApiUrl) {
+        apiUrlInput.value = savedApiUrl;
+        return;
+    }
+    apiUrlInput.value = configApiUrl;
 }
 
 /**
@@ -382,6 +428,7 @@ targetLang.addEventListener('change', () => {
  * API Key保存按钮事件监听器
  */
 apiKeySave.addEventListener('click', saveApiKey);
+apiUrlSave.addEventListener('click', saveApiUrl);
 
 /**
  * API Key输入框回车事件监听器
@@ -389,6 +436,11 @@ apiKeySave.addEventListener('click', saveApiKey);
 apiKeyInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         saveApiKey();
+    }
+});
+apiUrlInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        saveApiUrl();
     }
 });
 
@@ -499,8 +551,8 @@ function triggerAutoTranslate() {
         tokenCount.style.display = 'none';
 
         try {
-            // 调用GLM翻译API
-            await translateWithGLM(text, sourceLang.value, targetLang.value);
+            // 调用OpenAI翻译API
+            await translateWithOpenAI(text, sourceLang.value, targetLang.value);
             // 流式传输会在函数内部实时显示，无需额外处理
         } catch (error) {
             // 用数组includes简化判断，直接处理非取消错误
@@ -516,25 +568,32 @@ function triggerAutoTranslate() {
 }
 
 /**
- * ====================== GLM翻译核心功能 ======================
+ * ====================== OpenAI翻译核心功能 ======================
  */
 
 /**
- * 智谱GLM翻译函数 - 使用流式传输实现实时翻译效果
+ * OpenAI翻译函数 - 使用流式传输实现实时翻译效果
  * @param {string} text - 要翻译的文本
  * @param {string} from - 源语言代码
  * @param {string} to - 目标语言代码
  * @returns {Promise<string>} 翻译结果
  */
-async function translateWithGLM(text, from, to) {
+async function translateWithOpenAI(text, from, to) {
     // 创建新的AbortController用于取消请求
     currentAbortController = new AbortController();
     const { signal } = currentAbortController;
 
-    const url = config.api_url;
-
-    // 获取有效的Token，如果用户配置了API密钥则使用空字符串
-    const token = await getValidToken();
+    const url = buildApiUrl('/chat/completions');
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
+        updateTokenStatus(TOKEN_STATUS.UNFETCHED);
+        showErrorToast('未配置API Key，请在设置中填写或检查配置文件');
+        throw new Error('未配置API Key');
+    }
+    if (!modelSelect.value) {
+        showErrorToast('未选择模型，请先获取并选择模型');
+        throw new Error('未选择模型');
+    }
 
     // 构建提示词，使用语言名称映射
     const sourceLangName = languageNames[from] || '自动检测';
@@ -567,21 +626,17 @@ async function translateWithGLM(text, from, to) {
         ],
         temperature: 0.1,                            // 温度参数，控制随机性
         top_p: 0.1,                                 // 采样参数
-        max_tokens: config.max_tokens[modelSelect.value] || 65536, // 最大token数
         stream: true,                               // 启用流式传输
-        thinking: {                                   // GLM-4.5思考模式
-            type: config.thinking                   // 控制模型是否思考
-        }
+        stream_options: { include_usage: true }     // 需要在流式返回中包含usage
     };
 
-    // 发送HTTP请求到智谱GLM API
-    // 如果用户配置了API密钥，则使用API密钥认证，否则使用JWT token
-    const authorization = token ? `Bearer ${token}` : `Bearer ${localStorage.getItem('apiKey')}`;
+    // 发送HTTP请求到OpenAI API
+    const authorization = `Bearer ${apiKey}`;
 
     const response = await fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': authorization,               // API密钥或JWT token认证
+            'Authorization': authorization,               // API Key认证
             'Content-Type': 'application/json'            // JSON格式
         },
         body: JSON.stringify(requestBody),               // 请求体
@@ -590,8 +645,13 @@ async function translateWithGLM(text, from, to) {
 
     // 检查HTTP响应状态
     if (!response.ok) {
-        const errorData = await response.json();
-        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+        let errorMsg = `HTTP ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMsg = errorData.error?.message || errorMsg;
+        } catch (e) {
+            // 忽略解析错误
+        }
         showErrorToast(`翻译API错误: ${errorMsg}`);
         throw new Error(errorMsg);
     }
@@ -600,8 +660,6 @@ async function translateWithGLM(text, from, to) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullContent = '';                                 // 完整翻译内容
-    let thinkingContent = '';                             // 思考过程内容
-    let isThinking = false;                              // 是否正在思考
     let totalTokens = 0;                                 // 总token消耗
 
     // 返回Promise处理流式数据
@@ -622,12 +680,7 @@ async function translateWithGLM(text, from, to) {
                     // 流结束，清除AbortController并返回最终结果
                     currentAbortController = null;
                     updateTokenDisplay(totalTokens);
-                    if (config.thinkPrint && thinkingContent) {
-                        // 如果启用思考过程显示，返回包含思考过程的完整结果
-                        resolve(`思考过程：\n${thinkingContent}\n\n翻译结果：\n${fullContent}`);
-                    } else {
-                        resolve(fullContent);
-                    }
+                    resolve(fullContent);
                     return;
                 }
 
@@ -643,27 +696,14 @@ async function translateWithGLM(text, from, to) {
 
                         try {
                             const json = JSON.parse(data);
-                            const delta = json.choices[0].delta;
+                            const delta = json.choices?.[0]?.delta;
 
                             // 统计token消耗
                             if (json.usage) {
                                 totalTokens = json.usage.total_tokens || 0;
                             }
-
-                            // 处理思考过程内容（GLM-4.5特有功能）
-                            if (delta.thinking_content) {
-                                isThinking = true;
-                                thinkingContent += delta.thinking_content;
-                                // 实时显示思考过程
-                                if (config.thinkPrint) {
-                                    setTranslationResult(`思考中...\n${thinkingContent}`, true);
-                                    resultArea.scrollTop = resultArea.scrollHeight;
-                                }
-                            } else if (delta.content) {
-                                isThinking = false;
+                            if (delta?.content) {
                                 fullContent += delta.content;
-
-                                // 立即显示内容
                                 updateDisplay();
                             }
                         } catch (e) {
@@ -684,19 +724,10 @@ async function translateWithGLM(text, from, to) {
 
         /**
          * 更新显示内容
-         * 根据配置显示思考过程和翻译结果
+         * 实时显示翻译结果
          */
         function updateDisplay() {
-            if (config.thinkPrint && thinkingContent) {
-                // 显示思考过程和翻译结果
-                const escapedThinkingContent = escapeHtml(thinkingContent);
-                const escapedFullContent = escapeHtml(fullContent);
-                const htmlContent = `<div style="color: #666; font-style: italic; white-space: pre-wrap;">思考过程：\n${escapedThinkingContent}</div><hr style="margin: 10px 0;"><div style="white-space: pre-wrap;">${escapedFullContent}</div>`;
-                setTranslationResult(htmlContent, true);
-            } else {
-                // 只显示翻译结果
-                setTranslationResult(fullContent);
-            }
+            setTranslationResult(fullContent);
 
             // 延迟调整高度和滚动位置，确保DOM更新完成
             setTimeout(() => {
@@ -710,7 +741,7 @@ async function translateWithGLM(text, from, to) {
 }
 
 /**
- * ====================== Token管理功能 ======================
+ * ====================== Key管理功能 ======================
  */
 
 /**
@@ -727,44 +758,6 @@ function updateTokenDisplay(tokens) {
 }
 
 /**
- * 获取API Token
- * 从后端API获取JWT token用于智谱API认证
- * @returns {Promise<string>} 有效的JWT token
- */
-async function getApiToken() {
-    try {
-        // 设置正在获取状态
-        updateTokenStatus(TOKEN_STATUS.FETCHING);
-
-        const response = await fetch(config.token_api);
-        const data = await response.json();
-
-        if (data.apiToken && data.expireTime) {
-            // 保存token和过期时间
-            currentToken = data.apiToken;
-            tokenExpireTime = data.expireTime * 1000; // 直接使用后端返回的时间戳（转换为毫秒）
-            updateTokenStatus(TOKEN_STATUS.VALID);
-            return currentToken;
-        } else {
-            throw new Error('Token API返回格式错误');
-        }
-    } catch (error) {
-        console.error('获取Token失败:', error);
-        updateTokenStatus(TOKEN_STATUS.FETCH_FAILED);
-        showErrorToast('获取Token失败，请检查服务器配置');
-        throw error;
-    }
-}
-
-/**
- * 检查Token是否有效
- * @returns {boolean} token是否有效且未过期
- */
-function isTokenValid() {
-    return currentToken && Date.now() < tokenExpireTime;
-}
-
-/**
  * 检查是否已配置API密钥
  * @returns {boolean} 是否已配置API密钥
  */
@@ -774,103 +767,162 @@ function hasApiKeyConfigured() {
 }
 
 /**
+ * 获取当前有效的API Key（用户优先）
+ * @returns {string} 有效的API Key或空字符串
+ */
+function getActiveApiKey() {
+    const userKey = hasApiKeyConfigured() ? localStorage.getItem('apiKey').trim() : '';
+    return userKey || configApiKey;
+}
+
+/**
+ * 获取当前有效的API URL（用户优先）
+ * @returns {string} 有效的API URL或空字符串
+ */
+function getActiveApiUrl() {
+    const userUrl = localStorage.getItem('apiUrl');
+    return (userUrl && userUrl.trim()) ? userUrl.trim() : configApiUrl;
+}
+
+/**
+ * 获取当前应显示的状态
+ * @returns {string} TOKEN_STATUS状态值
+ */
+function getConfiguredTokenStatus() {
+    if (hasApiKeyConfigured()) {
+        return TOKEN_STATUS.CONFIGURED;
+    }
+    if (configApiKey) {
+        return TOKEN_STATUS.VALID;
+    }
+    return TOKEN_STATUS.UNFETCHED;
+}
+
+/**
  * 更新Token状态显示
  * @param {string} status - token状态，使用TOKEN_STATUS枚举
- * @param {Object} options - 可选参数
- * @param {number} options.remainingTime - 剩余时间（秒），仅VALID状态需要
  */
-function updateTokenStatus(status, options = {}) {
+function updateTokenStatus(status) {
     // 更新全局状态
     currentTokenStatus = status;
-
-    const { remainingTime } = options;
 
     switch (status) {
         case TOKEN_STATUS.CONFIGURED:
             // 已配置API密钥状态
-            tokenStatus.textContent = 'Token: 已配置key';
+            tokenStatus.textContent = 'Key: 已配置';
             tokenStatus.className = 'token-status configured';
             break;
         case TOKEN_STATUS.FETCHING:
-            // Token正在获取状态
-            tokenStatus.textContent = 'Token: 获取中';
+            // 正在获取状态
+            tokenStatus.textContent = 'Key: 获取中';
             tokenStatus.className = 'token-status fetching';
             break;
         case TOKEN_STATUS.FETCH_FAILED:
-            // Token获取失败状态
-            tokenStatus.textContent = 'Token: 获取失败';
+            // 获取失败状态
+            tokenStatus.textContent = 'Key: 获取失败';
             tokenStatus.className = 'token-status expired';
             break;
         case TOKEN_STATUS.UNFETCHED:
-            // Token未获取状态
-            tokenStatus.textContent = 'Token: 未获取';
+            // 未获取状态
+            tokenStatus.textContent = 'Key: 未获取';
             tokenStatus.className = 'token-status';
             break;
         case TOKEN_STATUS.VALID:
-            // Token有效状态，显示剩余时间
-            if (remainingTime !== undefined) {
-                const minutes = Math.floor(remainingTime / 60);
-                const seconds = remainingTime % 60;
-                tokenStatus.textContent = `Token: 有效 (${minutes}:${seconds.toString().padStart(2, '0')})`;
-            } else {
-                tokenStatus.textContent = 'Token: 有效';
-            }
+            // 已获取状态
+            tokenStatus.textContent = 'Key: 已获取';
             tokenStatus.className = 'token-status valid';
-            break;
-        case TOKEN_STATUS.EXPIRED:
-            // Token过期状态
-            tokenStatus.textContent = 'Token: 已过期';
-            tokenStatus.className = 'token-status expired';
             break;
         default:
             // 默认状态
-            tokenStatus.textContent = 'Token: 未知状态';
+            tokenStatus.textContent = 'Key: 未知状态';
             tokenStatus.className = 'token-status';
     }
 }
 
 /**
- * 获取有效的Token
- * 检查当前token是否有效，如果无效或获取失败则重新获取
- * 如果用户已配置API密钥，则返回空字符串
- * @returns {Promise<string>} 有效的JWT token或空字符串
+ * 构建API完整地址
+ * @param {string} path - API路径
+ * @returns {string} 完整URL
  */
-async function getValidToken() {
-    // 如果用户已配置API密钥，直接返回空字符串
-    if (hasApiKeyConfigured()) {
-        return '';
+function buildApiUrl(path) {
+    const baseUrl = getActiveApiUrl().replace(/\/$/, '');
+    return `${baseUrl}${path}`;
+}
+
+/**
+ * 获取模型列表
+ * 使用OpenAI标准模型发现接口
+ */
+async function fetchModels() {
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
+        updateTokenStatus(TOKEN_STATUS.UNFETCHED);
+        modelSelect.innerHTML = '';
+        return;
     }
 
-    if (!isTokenValid() || currentTokenStatus === TOKEN_STATUS.FETCH_FAILED) {
-        await getApiToken();
+    updateTokenStatus(TOKEN_STATUS.FETCHING);
+
+    try {
+        const response = await fetch(buildApiUrl('/models'), {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`
+            }
+        });
+
+        if (!response.ok) {
+            let errorMsg = `HTTP ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error?.message || errorMsg;
+            } catch (e) {
+                // 忽略解析错误
+            }
+            throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+        availableModels = (data.data || [])
+            .map(model => model.id)
+            .filter(Boolean)
+            .sort();
+
+        initModelSelector(availableModels);
+
+        if (availableModels.length === 0) {
+            showErrorToast('未获取到模型列表，请检查API Key权限');
+        }
+
+        updateTokenStatus(getConfiguredTokenStatus());
+    } catch (error) {
+        console.error('获取模型列表失败:', error);
+        updateTokenStatus(TOKEN_STATUS.FETCH_FAILED);
+        showErrorToast(`获取模型列表失败: ${error.message}`);
     }
-    return currentToken;
 }
 
 /**
  * 初始化模型选择器
- * 根据配置文件中的模型列表动态生成下拉框选项
+ * 根据模型列表动态生成下拉框选项
+ * @param {string[]} models - 模型列表
  */
-function initModelSelector() {
-    if (config.model && Array.isArray(config.model)) {
-        modelSelect.innerHTML = '';
-        config.model.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model;
-            option.textContent = model;
-            modelSelect.appendChild(option);
-        });
+function initModelSelector(models = []) {
+    modelSelect.innerHTML = '';
+    models.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model;
+        option.textContent = model;
+        modelSelect.appendChild(option);
+    });
 
-        // 从localStorage加载用户保存的模型偏好
-        const savedModel = localStorage.getItem('preferredModel');
-        if (savedModel && config.model.includes(savedModel)) {
-            modelSelect.value = savedModel;
-        } else {
-            // 默认选择第一个模型
-            if (config.model.length > 0) {
-                modelSelect.value = config.model[0];
-            }
-        }
+    // 从localStorage加载用户保存的模型偏好
+    const savedModel = localStorage.getItem('preferredModel');
+    if (savedModel && models.includes(savedModel)) {
+        modelSelect.value = savedModel;
+    } else if (models.length > 0) {
+        // 默认选择第一个模型
+        modelSelect.value = models[0];
     }
 }
 
@@ -884,42 +936,29 @@ function initModelSelector() {
  */
 async function loadConfig() {
     try {
+        updateTokenStatus(TOKEN_STATUS.FETCHING);
+
         const response = await fetch('config.json');
         config = await response.json();
+        configApiKey = (config.api_key || '').trim();
+        configApiUrl = (config.api_url || '').trim();
 
-        // 初始化模型选择器
-        initModelSelector();
+        // 加载用户自定义Key（持久化）
+        loadApiKey();
+        loadApiUrl();
 
-        // 如果用户未配置API密钥，则获取Token
-        if (!hasApiKeyConfigured()) {
-            await getApiToken();
-        }
+        // 根据配置和用户Key更新状态
+        updateTokenStatus(getConfiguredTokenStatus());
 
-        // 定时更新Token状态显示（每秒更新一次）
-        setInterval(() => {
-            if (hasApiKeyConfigured()) {
-                updateTokenStatus(TOKEN_STATUS.CONFIGURED);
-            } else if (isTokenValid()) {
-                const remainingTime = Math.floor((tokenExpireTime - Date.now()) / 1000);
-                updateTokenStatus(TOKEN_STATUS.VALID, { remainingTime });
-            } else if (currentTokenStatus === TOKEN_STATUS.FETCH_FAILED) {
-                // updateTokenStatus(TOKEN_STATUS.FETCH_FAILED); // 获取失败，此状态无需触发更新
-            } else if (currentTokenStatus === TOKEN_STATUS.FETCHING) {
-                // updateTokenStatus(TOKEN_STATUS.FETCHING); // 获取中，此状态无需触发更新
-            } else if (!currentToken) {
-                updateTokenStatus(TOKEN_STATUS.UNFETCHED);
-            } else {
-                updateTokenStatus(TOKEN_STATUS.EXPIRED);
-            }
-        }, 1000);
+        // 拉取模型列表
+        await fetchModels();
 
     } catch (error) {
         console.error('加载配置文件失败:', error);
+        updateTokenStatus(TOKEN_STATUS.FETCH_FAILED);
         // 根据错误类型显示不同的用户提示
         if (error.message.includes('Failed to fetch')) {
             showErrorToast('网络连接失败，请检查网络连接或服务器状态');
-        } else if (error.message.includes('Token')) {
-            showErrorToast('获取Token失败，请检查Token API配置是否正确');
         } else {
             showErrorToast('加载配置文件失败，请检查config.json是否存在且格式正确');
         }

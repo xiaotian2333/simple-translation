@@ -4,14 +4,14 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>简单翻译 - xiaotian</title>
-        <meta name="description" content="基于智谱GLM的智能翻译工具，支持多种语言之间的翻译。">
+        <meta name="description" content="基于大模型的智能翻译工具，支持多种语言之间的翻译。">
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>简单翻译</h1>
-                <p>基于智谱GLM的智能翻译工具</p>
+                <p>基于大模型的智能翻译工具</p>
             </div>
 
             <div class="translate-container">
@@ -44,7 +44,7 @@
                 <div class="settings-panel">
                     <div class="settings-header" id="settingsHeader">
                         <span class="settings-title">⚙️ 设置</span>
-                        <span class="token-status" id="tokenStatus">Token: 未获取</span>
+                        <span class="token-status" id="tokenStatus">Key: 未获取</span>
                         <span class="settings-toggle" id="settingsToggle">▼</span>
                     </div>
                     <div class="settings-content" id="settingsContent">
@@ -53,6 +53,11 @@
                             <select class="model-select" id="modelSelect">
                                 <!-- 模型选项将通过JavaScript动态加载 -->
                             </select>
+                        </div>
+                        <div class="api-key-container api-url-container">
+                            <span class="api-key-label">接口：</span>
+                            <input type="text" class="api-key-input" id="apiUrlInput" placeholder="https://api.openai.com/v1（需以/v1结尾）">
+                            <button class="api-key-save" id="apiUrlSave">保存</button>
                         </div>
                         <div class="api-key-container">
                             <span class="api-key-label">密钥：</span>
@@ -95,7 +100,7 @@
                 </div>
 
                 <div class="loading" id="loading">
-                    <div>🔄 正在调用智谱GLM进行翻译...</div>
+                    <div>🔄 正在调用大模型进行翻译...</div>
                 </div>
             </div>
             
@@ -134,3 +139,4 @@
         <script src="js/script.js"></script>
     </body>
 </html>
+
