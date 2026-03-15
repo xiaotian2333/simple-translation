@@ -7,6 +7,7 @@
 const sourceLang = document.getElementById('sourceLang');      // 源语言选择下拉框
 const targetLang = document.getElementById('targetLang');      // 目标语言选择下拉框
 const swapBtn = document.getElementById('swapBtn');            // 语言交换按钮
+const replaceBtn = document.getElementById('replaceBtn');      // 替换符号按钮
 
 // 文本输入输出相关元素
 const sourceText = document.getElementById('sourceText');      // 源文本输入框
@@ -277,6 +278,19 @@ swapBtn.addEventListener('click', () => {
     // 调整输入框和结果区域的高度
     adjustTextareaHeight(sourceText);
     adjustResultAreaHeight();
+});
+
+/**
+ * 一键替换原文中的 - 和 _ 为空格
+ */
+replaceBtn.addEventListener('click', () => {
+    if (!sourceText.value) {
+        return;
+    }
+    sourceText.value = sourceText.value.replace(/[-_]/g, ' ');
+    charCount.textContent = `${sourceText.value.length} 字符`;
+    adjustTextareaHeight(sourceText);
+    triggerAutoTranslate();
 });
 
 /**
